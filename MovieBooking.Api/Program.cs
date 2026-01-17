@@ -11,33 +11,42 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddControllers();
 builder.Services.AddSignalR();
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+// builder.Services.AddEndpointsApiExplorer();
+// Swagger Removed due to .NET 10 incompatibility
+// builder.Services.AddSwaggerGen();
 
-// Setup DbContext with SQLite
+// Setup DbContext (Default: SQLite for local dev. Switch to Npgsql for Prod)
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlite("Data Source=moviebooking.db"));
+    // options.UseNpgsql(...)); // PRODUCTION
 
-// Register Services
+// Redis Configuration (Default: Mock for local dev)
+// builder.Services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Connect("localhost"));
+// builder.Services.AddSingleton<IDistributedLockService, RedisLockService>(); 
+builder.Services.AddSingleton<IDistributedLockService, MockRedisLockService>(); // DEV
+
 builder.Services.AddScoped<ISeatService, SeatService>();
-builder.Services.AddSingleton<IDistributedLockService, MockRedisLockService>(); // Optimization: Singleton In-Memory Lock
 builder.Services.AddHostedService<SeatCleanupHelper>();
 
 // Add CORS for the frontend simulation
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll",
-        builder => builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
+        builder => builder.AllowAnyMethod().AllowAnyHeader().AllowCredentials().SetIsOriginAllowed(_ => true));
 });
+
+builder.Services.AddSignalR();
+builder.Services.AddControllers();
 
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+// Swagger Removed
+// if (app.Environment.IsDevelopment())
+// {
+//      // app.UseSwagger();
+//      // app.UseSwaggerUI();
+// }
 
 app.UseCors("AllowAll");
 app.UseDefaultFiles(); // Enables index.html at root

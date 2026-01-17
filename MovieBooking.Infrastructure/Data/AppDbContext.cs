@@ -16,24 +16,27 @@ public class AppDbContext : DbContext
     {
         base.OnModelCreating(modelBuilder);
 
-        // Configure Show
         modelBuilder.Entity<Show>(entity =>
         {
             entity.HasKey(e => e.Id);
             entity.Property(e => e.Title).IsRequired();
+            entity.HasMany(s => s.Seats)
+                  .WithOne(s => s.Show)
+                  .HasForeignKey(s => s.ShowId);
         });
 
-        // Configure Seat
         modelBuilder.Entity<Seat>(entity =>
         {
             entity.HasKey(e => e.Id);
             entity.Property(e => e.Row).IsRequired();
-            
-            // Configure Optimistic Concurrency
-            entity.Property(e => e.RowVersion)
-                .IsConcurrencyToken(); // Use ConcurrencyToken for SQLite manual handling
+            entity.Property(s => s.RowVersion).IsConcurrencyToken();
         });
     }
+    
+    // Postgres doesn't need manual RowVersion incrementing like SQLite specific trickery
+    // We can rely on application-side versioning or database triggers. 
+    // To keep it simple and robust: We will increment the RowVersion manually in SaveChanges
+    // to ensure it changes on every update, acting as an application-managed concurrency token.
 
     public override int SaveChanges()
     {
@@ -51,9 +54,12 @@ public class AppDbContext : DbContext
     {
         foreach (var entry in ChangeTracker.Entries<Seat>())
         {
-            if (entry.State == EntityState.Modified || entry.State == EntityState.Added)
+            if (entry.State == EntityState.Modified)
             {
-                // Manually set RowVersion for SQLite
+                entry.Entity.RowVersion = Guid.NewGuid().ToByteArray(); 
+            }
+            else if (entry.State == EntityState.Added)
+            {
                 entry.Entity.RowVersion = Guid.NewGuid().ToByteArray();
             }
         }

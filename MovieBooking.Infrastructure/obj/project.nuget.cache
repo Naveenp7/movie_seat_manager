@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "gUvZd6C0e5s=",
+  "dgSpecHash": "C1Lu6aq6a4E=",
   "success": true,
   "projectFilePath": "C:\\work\\Fantacode\\movie_seat_manager\\MovieBooking.Infrastructure\\MovieBooking.Infrastructure.csproj",
   "expectedPackageFiles": [
@@ -15,10 +15,14 @@
     "C:\\Users\\navee\\.nuget\\packages\\microsoft.extensions.hosting\\10.0.2\\microsoft.extensions.hosting.10.0.2.nupkg.sha512",
     "C:\\Users\\navee\\.nuget\\packages\\microsoft.extensions.hosting.abstractions\\10.0.2\\microsoft.extensions.hosting.abstractions.10.0.2.nupkg.sha512",
     "C:\\Users\\navee\\.nuget\\packages\\microsoft.extensions.logging.abstractions\\10.0.2\\microsoft.extensions.logging.abstractions.10.0.2.nupkg.sha512",
+    "C:\\Users\\navee\\.nuget\\packages\\npgsql\\8.0.0\\npgsql.8.0.0.nupkg.sha512",
+    "C:\\Users\\navee\\.nuget\\packages\\npgsql.entityframeworkcore.postgresql\\8.0.0\\npgsql.entityframeworkcore.postgresql.8.0.0.nupkg.sha512",
+    "C:\\Users\\navee\\.nuget\\packages\\pipelines.sockets.unofficial\\2.2.8\\pipelines.sockets.unofficial.2.2.8.nupkg.sha512",
     "C:\\Users\\navee\\.nuget\\packages\\sqlitepclraw.bundle_e_sqlite3\\2.1.11\\sqlitepclraw.bundle_e_sqlite3.2.1.11.nupkg.sha512",
     "C:\\Users\\navee\\.nuget\\packages\\sqlitepclraw.core\\2.1.11\\sqlitepclraw.core.2.1.11.nupkg.sha512",
     "C:\\Users\\navee\\.nuget\\packages\\sqlitepclraw.lib.e_sqlite3\\2.1.11\\sqlitepclraw.lib.e_sqlite3.2.1.11.nupkg.sha512",
-    "C:\\Users\\navee\\.nuget\\packages\\sqlitepclraw.provider.e_sqlite3\\2.1.11\\sqlitepclraw.provider.e_sqlite3.2.1.11.nupkg.sha512"
+    "C:\\Users\\navee\\.nuget\\packages\\sqlitepclraw.provider.e_sqlite3\\2.1.11\\sqlitepclraw.provider.e_sqlite3.2.1.11.nupkg.sha512",
+    "C:\\Users\\navee\\.nuget\\packages\\stackexchange.redis\\2.7.4\\stackexchange.redis.2.7.4.nupkg.sha512"
   ],
   "logs": [
     {
@@ -53,6 +57,18 @@
       "warningLevel": 1,
       "filePath": "C:\\work\\Fantacode\\movie_seat_manager\\MovieBooking.Infrastructure\\MovieBooking.Infrastructure.csproj",
       "libraryId": "Microsoft.Extensions.Logging.Abstractions",
+      "targetGraphs": [
+        "net10.0"
+      ]
+    },
+    {
+      "code": "NU1903",
+      "level": "Warning",
+      "message": "Package 'Npgsql' 8.0.0 has a known high severity vulnerability, https://github.com/advisories/GHSA-x9vc-6hfv-hg8c",
+      "projectPath": "C:\\work\\Fantacode\\movie_seat_manager\\MovieBooking.Infrastructure\\MovieBooking.Infrastructure.csproj",
+      "warningLevel": 1,
+      "filePath": "C:\\work\\Fantacode\\movie_seat_manager\\MovieBooking.Infrastructure\\MovieBooking.Infrastructure.csproj",
+      "libraryId": "Npgsql",
       "targetGraphs": [
         "net10.0"
       ]

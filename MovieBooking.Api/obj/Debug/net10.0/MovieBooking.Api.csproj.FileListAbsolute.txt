@@ -39,9 +39,6 @@ C:\work\Fantacode\movie_seat_manager\MovieBooking.Api\bin\Debug\net10.0\Newtonso
 C:\work\Fantacode\movie_seat_manager\MovieBooking.Api\bin\Debug\net10.0\SQLitePCLRaw.batteries_v2.dll
 C:\work\Fantacode\movie_seat_manager\MovieBooking.Api\bin\Debug\net10.0\SQLitePCLRaw.core.dll
 C:\work\Fantacode\movie_seat_manager\MovieBooking.Api\bin\Debug\net10.0\SQLitePCLRaw.provider.e_sqlite3.dll
-C:\work\Fantacode\movie_seat_manager\MovieBooking.Api\bin\Debug\net10.0\Swashbuckle.AspNetCore.Swagger.dll
-C:\work\Fantacode\movie_seat_manager\MovieBooking.Api\bin\Debug\net10.0\Swashbuckle.AspNetCore.SwaggerGen.dll
-C:\work\Fantacode\movie_seat_manager\MovieBooking.Api\bin\Debug\net10.0\Swashbuckle.AspNetCore.SwaggerUI.dll
 C:\work\Fantacode\movie_seat_manager\MovieBooking.Api\bin\Debug\net10.0\System.CodeDom.dll
 C:\work\Fantacode\movie_seat_manager\MovieBooking.Api\bin\Debug\net10.0\System.Composition.AttributedModel.dll
 C:\work\Fantacode\movie_seat_manager\MovieBooking.Api\bin\Debug\net10.0\System.Composition.Convention.dll
@@ -158,3 +155,7 @@ C:\work\Fantacode\movie_seat_manager\MovieBooking.Api\obj\Debug\net10.0\MovieBoo
 C:\work\Fantacode\movie_seat_manager\MovieBooking.Api\obj\Debug\net10.0\ref\MovieBooking.Api.dll
 C:\work\Fantacode\movie_seat_manager\MovieBooking.Api\obj\Debug\net10.0\compressed\werx1itsdc-{0}-a39ckpyprj-a39ckpyprj.gz
 C:\work\Fantacode\movie_seat_manager\MovieBooking.Api\obj\Debug\net10.0\compressed\syr1grndkx-{0}-c17b7q3hnp-c17b7q3hnp.gz
+C:\work\Fantacode\movie_seat_manager\MovieBooking.Api\bin\Debug\net10.0\Npgsql.dll
+C:\work\Fantacode\movie_seat_manager\MovieBooking.Api\bin\Debug\net10.0\Npgsql.EntityFrameworkCore.PostgreSQL.dll
+C:\work\Fantacode\movie_seat_manager\MovieBooking.Api\bin\Debug\net10.0\Pipelines.Sockets.Unofficial.dll
+C:\work\Fantacode\movie_seat_manager\MovieBooking.Api\bin\Debug\net10.0\StackExchange.Redis.dll

@@ -25,6 +25,40 @@ The system employs a "Defense in Depth" strategy to guarantee data integrity und
 *   **Architecture**: Decoupled Broadcasts. Visual updates are fire-and-forget background tasks that do not block the critical transaction path.
 *   **Throughput**: Capable of broadcasting state changes to thousands of connected clients with sub-100ms latency.
 
+### 🧪 API Endpoints (Swagger)
+You can view the raw API documentation (if enabled in Dev mode) or use tools like Postman:
+*   `GET /api/seats/shows`: Get available shows.
+*   `GET /api/seats/{showId}`: Get all seats for a show.
+*   `POST /api/seats/hold-bulk`: Hold multiple seats.
+*   `POST /api/seats/book-bulk`: Book held seats.
+
+---
+
+## ⚙️ Development vs. Production
+
+The application is configured for **Zero-Dependency Development** by default, but includes full **Production Infrastructure** code.
+
+### 🟡 Development Mode (Default)
+*   **Database**: SQLite (`moviebooking.db`) - No installation needed.
+*   **Cache**: In-Memory Mock Redis.
+*   **Setup**: Just run `dotnet run`.
+
+### 🟢 Production Mode (Docker)
+To enable the high-performance architecture (PostgreSQL + Redis):
+1.  **Start Infrastructure**:
+    ```bash
+    docker compose up -d
+    ```
+2.  **Update Config**:
+    In `MovieBooking.Api/Program.cs`, uncomment the **Production** lines and comment out the **Development** lines:
+    ```csharp
+    // options.UseSqlite(...); // Comment this
+    options.UseNpgsql(...);   // Uncomment this
+    
+    // builder.Services.AddSingleton<...MockRedisLockService>(); // Comment this
+    builder.Services.AddSingleton<IDistributedLockService, RedisLockService>(); // Uncomment this
+    ```
+
 ---
 
 ## 🛠 Tech Stack

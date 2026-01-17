@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using MovieBooking.Core.Interfaces;
 using MovieBooking.Core.Entities;
-using MovieBooking.Core.Entities;
 using Microsoft.EntityFrameworkCore;
 using MovieBooking.Core.DTOs;
 
