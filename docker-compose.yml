@@ -11,14 +11,32 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
 
-  redis:
+  redis-master:
     image: redis:7-alpine
-    container_name: moviebooking_redis
-    command: ["redis-server", "--appendonly", "yes"] # Enable AOF Persistence
+    container_name: msm_redis_master
+    command: redis-server --appendonly yes --notify-keyspace-events Ex
     ports:
       - "6379:6379"
     volumes:
       - redisdata:/data
+
+  redis-replica:
+    image: redis:7-alpine
+    container_name: msm_redis_replica
+    command: redis-server --slaveof redis-master 6379 --appendonly yes
+    depends_on:
+      - redis-master
+
+  redis-sentinel:
+    image: redis:7-alpine
+    container_name: msm_redis_sentinel
+    command: >
+      bash -c "echo 'sentinel monitor mymaster redis-master 6379 2' > /tmp/sentinel.conf && echo 'sentinel down-after-milliseconds mymaster 5000' >> /tmp/sentinel.conf && echo 'sentinel failover-timeout mymaster 60000' >> /tmp/sentinel.conf && echo 'sentinel parallel-syncs mymaster 1' >> /tmp/sentinel.conf && redis-sentinel /tmp/sentinel.conf"
+    depends_on:
+      - redis-master
+      - redis-replica
+    ports:
+      - "26379:26379"
 
 volumes:
   pgdata:

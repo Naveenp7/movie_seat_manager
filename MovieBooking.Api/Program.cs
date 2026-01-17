@@ -23,10 +23,14 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 // Redis Configuration (Default: Mock for local dev)
 // builder.Services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Connect("localhost"));
 // builder.Services.AddSingleton<IDistributedLockService, RedisLockService>(); 
+// builder.Services.AddStackExchangeRedisCache(options => options.Configuration = "localhost"); // For Idempotency in Prod
+
 builder.Services.AddSingleton<IDistributedLockService, MockRedisLockService>(); // DEV
+builder.Services.AddDistributedMemoryCache(); // For Idempotency in Dev
 
 builder.Services.AddScoped<ISeatService, SeatService>();
-builder.Services.AddHostedService<SeatCleanupHelper>();
+builder.Services.AddHostedService<SeatCleanupHelper>(); // Fallback Polling (Works in Dev/Prod)
+// builder.Services.AddHostedService<RedisKeyExpiredSubscriber>(); // Reactive (Requires Real Redis - Uncomment for Prod)
 
 // Add CORS for the frontend simulation
 builder.Services.AddCors(options =>
@@ -49,6 +53,7 @@ var app = builder.Build();
 // }
 
 app.UseCors("AllowAll");
+app.UseMiddleware<MovieBooking.Api.Middleware.IdempotencyMiddleware>();
 app.UseDefaultFiles(); // Enables index.html at root
 app.UseStaticFiles(); // Serve index.html
 app.UseAuthorization();

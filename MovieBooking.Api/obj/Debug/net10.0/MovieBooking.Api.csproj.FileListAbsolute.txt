@@ -110,18 +110,14 @@ C:\work\Fantacode\movie_seat_manager\MovieBooking.Api\bin\Debug\net10.0\ru\Micro
 C:\work\Fantacode\movie_seat_manager\MovieBooking.Api\bin\Debug\net10.0\tr\Microsoft.CodeAnalysis.Workspaces.MSBuild.resources.dll
 C:\work\Fantacode\movie_seat_manager\MovieBooking.Api\bin\Debug\net10.0\zh-Hans\Microsoft.CodeAnalysis.Workspaces.MSBuild.resources.dll
 C:\work\Fantacode\movie_seat_manager\MovieBooking.Api\bin\Debug\net10.0\zh-Hant\Microsoft.CodeAnalysis.Workspaces.MSBuild.resources.dll
-C:\work\Fantacode\movie_seat_manager\MovieBooking.Api\bin\Debug\net10.0\runtimes\browser-wasm\nativeassets\net9.0\e_sqlite3.a
 C:\work\Fantacode\movie_seat_manager\MovieBooking.Api\bin\Debug\net10.0\runtimes\linux-arm\native\libe_sqlite3.so
 C:\work\Fantacode\movie_seat_manager\MovieBooking.Api\bin\Debug\net10.0\runtimes\linux-arm64\native\libe_sqlite3.so
 C:\work\Fantacode\movie_seat_manager\MovieBooking.Api\bin\Debug\net10.0\runtimes\linux-armel\native\libe_sqlite3.so
 C:\work\Fantacode\movie_seat_manager\MovieBooking.Api\bin\Debug\net10.0\runtimes\linux-mips64\native\libe_sqlite3.so
 C:\work\Fantacode\movie_seat_manager\MovieBooking.Api\bin\Debug\net10.0\runtimes\linux-musl-arm\native\libe_sqlite3.so
 C:\work\Fantacode\movie_seat_manager\MovieBooking.Api\bin\Debug\net10.0\runtimes\linux-musl-arm64\native\libe_sqlite3.so
-C:\work\Fantacode\movie_seat_manager\MovieBooking.Api\bin\Debug\net10.0\runtimes\linux-musl-riscv64\native\libe_sqlite3.so
-C:\work\Fantacode\movie_seat_manager\MovieBooking.Api\bin\Debug\net10.0\runtimes\linux-musl-s390x\native\libe_sqlite3.so
 C:\work\Fantacode\movie_seat_manager\MovieBooking.Api\bin\Debug\net10.0\runtimes\linux-musl-x64\native\libe_sqlite3.so
 C:\work\Fantacode\movie_seat_manager\MovieBooking.Api\bin\Debug\net10.0\runtimes\linux-ppc64le\native\libe_sqlite3.so
-C:\work\Fantacode\movie_seat_manager\MovieBooking.Api\bin\Debug\net10.0\runtimes\linux-riscv64\native\libe_sqlite3.so
 C:\work\Fantacode\movie_seat_manager\MovieBooking.Api\bin\Debug\net10.0\runtimes\linux-s390x\native\libe_sqlite3.so
 C:\work\Fantacode\movie_seat_manager\MovieBooking.Api\bin\Debug\net10.0\runtimes\linux-x64\native\libe_sqlite3.so
 C:\work\Fantacode\movie_seat_manager\MovieBooking.Api\bin\Debug\net10.0\runtimes\linux-x86\native\libe_sqlite3.so
@@ -159,3 +155,4 @@ C:\work\Fantacode\movie_seat_manager\MovieBooking.Api\bin\Debug\net10.0\Npgsql.d
 C:\work\Fantacode\movie_seat_manager\MovieBooking.Api\bin\Debug\net10.0\Npgsql.EntityFrameworkCore.PostgreSQL.dll
 C:\work\Fantacode\movie_seat_manager\MovieBooking.Api\bin\Debug\net10.0\Pipelines.Sockets.Unofficial.dll
 C:\work\Fantacode\movie_seat_manager\MovieBooking.Api\bin\Debug\net10.0\StackExchange.Redis.dll
+C:\work\Fantacode\movie_seat_manager\MovieBooking.Api\bin\Debug\net10.0\runtimes\browser-wasm\nativeassets\net8.0\e_sqlite3.a
