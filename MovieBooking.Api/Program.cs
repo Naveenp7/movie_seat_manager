@@ -20,6 +20,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 // Register Services
 builder.Services.AddScoped<ISeatService, SeatService>();
+builder.Services.AddSingleton<IDistributedLockService, MockRedisLockService>(); // Optimization: Singleton In-Memory Lock
 builder.Services.AddHostedService<SeatCleanupHelper>();
 
 // Add CORS for the frontend simulation
@@ -39,6 +40,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseCors("AllowAll");
+app.UseDefaultFiles(); // Enables index.html at root
 app.UseStaticFiles(); // Serve index.html
 app.UseAuthorization();
 app.MapControllers();

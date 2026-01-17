@@ -15,11 +15,13 @@ public class SeatService : ISeatService
 {
     private readonly AppDbContext _context;
     private readonly IHubContext<SeatHub> _hubContext;
+    private readonly IDistributedLockService _lockService;
 
-    public SeatService(AppDbContext context, IHubContext<SeatHub> hubContext)
+    public SeatService(AppDbContext context, IHubContext<SeatHub> hubContext, IDistributedLockService lockService)
     {
         _context = context;
         _hubContext = hubContext;
+        _lockService = lockService;
     }
 
     public async Task<List<Seat>> GetSeatsAsync(Guid showId)
@@ -66,11 +68,31 @@ public class SeatService : ISeatService
     {
         if (seatIds == null || !seatIds.Any()) return false;
 
-        using var transaction = await _context.Database.BeginTransactionAsync();
+        // OPTIMIZATION: Acquire "Redis" Locks first.
+        // This prevents multiple threads/instances from hitting the DB transaction layer if there's high contention.
+        var lockedKeys = new List<string>();
         try
         {
-            var sortedIds = seatIds.OrderBy(id => id).ToList();
-            var seats = await _context.Seats.Where(s => sortedIds.Contains(s.Id)).ToListAsync();
+            foreach (var id in seatIds)
+            {
+                string key = $"seat:{id}";
+                if (await _lockService.AcquireLockAsync(key, TimeSpan.FromSeconds(5))) // Short lock just for the transaction duration
+                {
+                    lockedKeys.Add(key);
+                }
+                else
+                {
+                    // Failed to acquire lock for one seat -> Contention -> Fail Fast
+                    return false;
+                }
+            }
+
+            // Proceed to DB Transaction (Source of Truth)
+            using var transaction = await _context.Database.BeginTransactionAsync();
+            try
+            {
+                var sortedIds = seatIds.OrderBy(id => id).ToList();
+                var seats = await _context.Seats.Where(s => sortedIds.Contains(s.Id)).ToListAsync();
 
             if (seats.Count != sortedIds.Count) return false;
 
@@ -109,6 +131,12 @@ public class SeatService : ISeatService
         {
             try { await transaction.RollbackAsync(); } catch {}
             return false;
+        }
+        }
+        finally
+        {
+            // Lock Safety: Always release mock-redis locks
+            foreach(var key in lockedKeys) await _lockService.ReleaseLockAsync(key);
         }
     }
 

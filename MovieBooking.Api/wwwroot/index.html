@@ -190,6 +190,26 @@
             box-shadow: 0 2px 0 #7c3aed;
         }
 
+        .seat .timer {
+            position: absolute;
+            bottom: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #000;
+            color: #fff;
+            padding: 2px 4px;
+            border-radius: 4px;
+            font-size: 0.55rem;
+            white-space: nowrap;
+            display: none;
+            z-index: 20;
+            pointer-events: none;
+        }
+
+        .seat.my-hold .timer {
+            display: block;
+        }
+
         .seat.booked {
             background-color: var(--seat-booked);
             color: rgba(255, 255, 255, 0.8);
@@ -365,7 +385,8 @@
         </div>
     </div>
     <script>
-        const API_URL = 'http://localhost:5033/api/seats';
+        // Use relative path so it works on localhost AND ngrok
+        const API_URL = '/api/seats';
         let currentUser = localStorage.getItem('currentUser') || 'UserA';
         document.getElementById('userSelect').value = currentUser;
 
@@ -397,7 +418,7 @@
                 refreshStats();
 
                 connection = new signalR.HubConnectionBuilder()
-                    .withUrl("http://localhost:5033/seatHub")
+                    .withUrl("/seatHub")
                     .withAutomaticReconnect()
                     .build();
 
@@ -450,7 +471,8 @@
                 const el = document.createElement('div');
                 el.className = 'seat';
                 el.id = `seat-${seat.id}`;
-                el.innerText = `${seat.row}${seat.number}`;
+                // Inner HTML structure for labels + timer
+                el.innerHTML = `<span class="seat-num">${seat.row}${seat.number}</span><div class="timer" id="timer-${seat.id}"></div>`;
                 el.onclick = () => onSeatClick(seat.id);
                 updateSeatVisual(seat, el);
                 grid.appendChild(el);
@@ -571,6 +593,29 @@
                 await forceReload();
             }
         }
+
+        function updateTimers() {
+            const now = new Date();
+            currentSeatsData.forEach(seat => {
+                if (seat.status === 1 && seat.holdExpiryTime) {
+                    const expiry = new Date(seat.holdExpiryTime + (seat.holdExpiryTime.endsWith('Z') ? '' : 'Z'));
+                    const diff = expiry - now;
+
+                    const timerEl = document.getElementById(`timer-${seat.id}`);
+                    if (timerEl) {
+                        if (diff > 0) {
+                            const secs = Math.floor(diff / 1000);
+                            timerEl.innerText = `${secs}s`;
+                        } else {
+                            timerEl.innerText = "";
+                        }
+                    }
+                }
+            });
+        }
+
+        // Start Timer Loop
+        setInterval(updateTimers, 1000);
 
         async function doBookBulk() {
             if (selectedHeldSeats.size === 0) return;
