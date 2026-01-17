@@ -1,0 +1,11 @@
+C:\work\Fantacode\movie_seat_manager\MovieBooking.Core\bin\Debug\net10.0\MovieBooking.Core.deps.json
+C:\work\Fantacode\movie_seat_manager\MovieBooking.Core\bin\Debug\net10.0\MovieBooking.Core.dll
+C:\work\Fantacode\movie_seat_manager\MovieBooking.Core\bin\Debug\net10.0\MovieBooking.Core.pdb
+C:\work\Fantacode\movie_seat_manager\MovieBooking.Core\obj\Debug\net10.0\MovieBooking.Core.GeneratedMSBuildEditorConfig.editorconfig
+C:\work\Fantacode\movie_seat_manager\MovieBooking.Core\obj\Debug\net10.0\MovieBooking.Core.AssemblyInfoInputs.cache
+C:\work\Fantacode\movie_seat_manager\MovieBooking.Core\obj\Debug\net10.0\MovieBooking.Core.AssemblyInfo.cs
+C:\work\Fantacode\movie_seat_manager\MovieBooking.Core\obj\Debug\net10.0\MovieBooking.Core.csproj.CoreCompileInputs.cache
+C:\work\Fantacode\movie_seat_manager\MovieBooking.Core\obj\Debug\net10.0\MovieBooking.Core.dll
+C:\work\Fantacode\movie_seat_manager\MovieBooking.Core\obj\Debug\net10.0\refint\MovieBooking.Core.dll
+C:\work\Fantacode\movie_seat_manager\MovieBooking.Core\obj\Debug\net10.0\MovieBooking.Core.pdb
+C:\work\Fantacode\movie_seat_manager\MovieBooking.Core\obj\Debug\net10.0\ref\MovieBooking.Core.dll

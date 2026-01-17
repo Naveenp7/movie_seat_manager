@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seat Booking Simulation</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 20px;
+            background: #fafafa;
+        }
+
+        .controls {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            border-left: 5px solid #0078d4;
+        }
+
+        .screen {
+            width: 80%;
+            height: 30px;
+            background: #444;
+            margin: 0 auto 30px auto;
+            border-radius: 0 0 50px 50px;
+            color: #aaa;
+            text-align: center;
+            font-size: 12px;
+            line-height: 25px;
+            box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.4);
+            transform: perspective(300px) rotateX(-2deg);
+        }
+
+        .seat-grid {
+            display: grid;
+            grid-template-columns: repeat(10, 1fr);
+            gap: 8px;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .seat {
+            padding: 10px 0;
+            text-align: center;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: bold;
+            user-select: none;
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        .seat:hover {
+            transform: scale(1.1);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Available */
+        .seat.available {
+            background-color: white;
+            border: 2px solid #ddd;
+            color: #555;
+        }
+
+        .seat.available:hover {
+            border-color: #88cc88;
+            background-color: #f0fff0;
+        }
+
+        /* Held by Others */
+        .seat.held {
+            background-color: #fffacd;
+            border: 2px solid #eebb00;
+            color: #aa8800;
+            cursor: default;
+        }
+
+        /* Held by Me */
+        .seat.my-hold {
+            background-color: #ffeebb;
+            border: 2px solid #ffaa00;
+            color: #d35400;
+            box-shadow: 0 0 5px orange;
+            animation: pulse 2s infinite;
+        }
+
+        /* Booked */
+        .seat.booked {
+            background-color: #ddd;
+            border: 2px solid #bbb;
+            color: #999;
+            cursor: not-allowed;
+        }
+
+        .seat.booked::after {
+            content: 'X';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0.3;
+        }
+
+        .legend {
+            margin-top: 40px;
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            font-size: 0.9em;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .box {
+            width: 16px;
+            height: 16px;
+            border-radius: 3px;
+            border: 1px solid #ccc;
+        }
+
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(255, 165, 0, 0.4);
+            }
+
+            70% {
+                box-shadow: 0 0 0 10px rgba(255, 165, 0, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(255, 165, 0, 0);
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1 style="text-align:center">🎬 Movie Seat Manager</h1>
+
+    <div class="controls">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <div>
+                <label><strong>Current User:</strong></label>
+                <select id="userSelect" onchange="changeUser()" style="padding: 5px;">
+                    <option value="UserA">User A</option>
+                    <option value="UserB">User B</option>
+                    <option value="UserC">User C</option>
+                </select>
+            </div>
+            <div id="status" style="color: #666; font-size: 0.9em;">Loading...</div>
+        </div>
+        <p style="margin: 10px 0 0 0; font-size: 0.8em; color: #888;">
+            * Click <strong>Available</strong> to HOLD. Click <strong>My Hold</strong> to BOOK.
+            * Holds expire in 1 minute.
+        </p>
+    </div>
+
+    <div class="screen">SCREEN</div>
+    <div id="grid" class="seat-grid"></div>
+
+    <div class="legend">
+        <div class="legend-item">
+            <div class="box" style="background:white; border:2px solid #ddd"></div> Available
+        </div>
+        <div class="legend-item">
+            <div class="box" style="background:#fffacd; border:2px solid #eebb00"></div> Held (Others)
+        </div>
+        <div class="legend-item">
+            <div class="box" style="background:#ffeebb; border:2px solid #ffaa00"></div> Held (By You)
+        </div>
+        <div class="legend-item">
+            <div class="box" style="background:#ddd; border:2px solid #bbb"></div> Booked
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:5033/api/seats'; // Verify Port!
+        let currentUser = localStorage.getItem('currentUser') || 'UserA';
+        document.getElementById('userSelect').value = currentUser;
+
+        let showId = null;
+        let pollingInterval = null;
+
+        async function init() {
+            try {
+                // Get Show
+                const res = await fetch(API_URL.replace('/seats', '/seats/shows'));
+                // We replaced to hit /api/seats/shows which I just added. 
+                // Wait, Controller route is [Route("api/[controller]")], so /api/seats/shows is correct?
+                // Yes: [HttpGet("shows")] inside SeatsController.
+
+                if (!res.ok) throw new Error("Failed to load shows");
+                const shows = await res.json();
+                if (shows.length === 0) {
+                    document.getElementById('status').innerText = "No shows found. seeding...";
+                    return;
+                }
+                showId = shows[0].id;
+                document.getElementById('status').innerText = `Watching Show: ${shows[0].title} (${shows[0].startTime})`;
+
+                loadSeats();
+                pollingInterval = setInterval(loadSeats, 1000); // 1s polling
+            } catch (e) {
+                console.error(e);
+                document.getElementById('status').innerText = "Error connecting to API. Is it running?";
+            }
+        }
+
+        async function loadSeats() {
+            if (!showId) return;
+            try {
+                const res = await fetch(`${API_URL}/${showId}`);
+                const seats = await res.json();
+                renderSeats(seats);
+            } catch (e) {
+                console.error("Polling error", e);
+            }
+        }
+
+        function renderSeats(seats) {
+            const grid = document.getElementById('grid');
+            grid.innerHTML = '';
+
+            seats.forEach(seat => {
+                const el = document.createElement('div');
+                el.className = 'seat';
+                el.innerText = `${seat.row}${seat.number}`;
+
+                // 0=Available, 1=Held, 2=Booked
+                if (seat.status === 2) {
+                    el.classList.add('booked');
+                    el.title = "Booked";
+                } else if (seat.status === 1) {
+                    if (seat.userId === currentUser) {
+                        el.classList.add('my-hold');
+                        el.title = "Held by YOU (Click to Book)";
+                        el.onclick = () => bookSeat(seat.id);
+                    } else {
+                        el.classList.add('held');
+                        el.title = "Held by someone else";
+                    }
+                } else {
+                    el.classList.add('available');
+                    el.title = "Available (Click to Hold)";
+                    el.onclick = () => holdSeat(seat.id);
+                }
+
+                grid.appendChild(el);
+            });
+        }
+
+        async function holdSeat(seatId) {
+            try {
+                const res = await fetch(`${API_URL}/hold`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ seatId, userId: currentUser })
+                });
+
+                if (res.ok) {
+                    loadSeats(); // Immediate refresh
+                } else {
+                    alert("Failed to hold! (Already taken?)");
+                }
+            } catch (e) { console.error(e); }
+        }
+
+        async function bookSeat(seatId) {
+            try {
+                const res = await fetch(`${API_URL}/book`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ seatId, userId: currentUser })
+                });
+
+                if (res.ok) {
+                    alert("Booked Successfully!");
+                    loadSeats();
+                } else {
+                    alert("Failed to book! (Expired?)");
+                    loadSeats();
+                }
+            } catch (e) { console.error(e); }
+        }
+
+        function changeUser() {
+            currentUser = document.getElementById('userSelect').value;
+            localStorage.setItem('currentUser', currentUser);
+            loadSeats();
+        }
+
+        init();
+    </script>
+</body>
+
+</html>

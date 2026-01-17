@@ -1,0 +1,5 @@
+C:\work\Fantacode\movie_seat_manager\MovieBooking.Infrastructure\obj\Debug\net10.0\MovieBooking.Infrastructure.csproj.AssemblyReference.cache
+C:\work\Fantacode\movie_seat_manager\MovieBooking.Infrastructure\obj\Debug\net10.0\MovieBooking.Infrastructure.GeneratedMSBuildEditorConfig.editorconfig
+C:\work\Fantacode\movie_seat_manager\MovieBooking.Infrastructure\obj\Debug\net10.0\MovieBooking.Infrastructure.AssemblyInfoInputs.cache
+C:\work\Fantacode\movie_seat_manager\MovieBooking.Infrastructure\obj\Debug\net10.0\MovieBooking.Infrastructure.AssemblyInfo.cs
+C:\work\Fantacode\movie_seat_manager\MovieBooking.Infrastructure\obj\Debug\net10.0\MovieBooking.Infrastructure.csproj.CoreCompileInputs.cache

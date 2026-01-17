@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seat Booking Simulation</title>
+    <style>
+        body { font-family: sans-serif; padding: 20px; }
+        .controls { margin-bottom: 20px; padding: 10px; background: #f0f0f0; border-radius: 5px; }
+        .screen { width: 100%; height: 20px; background: #333; margin-bottom: 30px; border-radius: 50%; color: white; text-align: center; font-size: 12px; line-height: 20px; }
+        .seat-grid { display: grid; grid-template-columns: repeat(10, 1fr); gap: 10px; max-width: 600px; margin: 0 auto; }
+        .seat {
+            padding: 10px;
+            text-align: center;
+            border-radius: 5px;
+            cursor: pointer;
+            border: 1px solid #ccc;
+            font-size: 14px;
+            user-select: none;
+        }
+        .seat.available { background-color: #e0ffe0; border-color: #88cc88; }
+        .seat.held { background-color: #fffacd; border-color: #eebb00; }
+        .seat.booked { background-color: #ffdddd; border-color: #cc8888; cursor: not-allowed; }
+        
+        .seat.my-hold { background-color: #ffeebb; border: 2px solid orange; font-weight: bold; }
+        
+        .legend { margin-top: 20px; display: flex; gap: 20px; justify-content: center; }
+        .legend-item { display: flex; align-items: center; gap: 5px; }
+        .box { width: 20px; height: 20px; border-radius: 3px; border: 1px solid #ccc; }
+    </style>
+</head>
+<body>
+
+    <h1>🎬 Movie Seat Manager</h1>
+    
+    <div class="controls">
+        <label><strong>Current User:</strong></label>
+        <select id="userSelect" onchange="changeUser()">
+            <option value="UserA">User A</option>
+            <option value="UserB">User B</option>
+            <option value="UserC">User C</option>
+        </select>
+        <span style="margin-left: 20px; font-size: 0.9em; color: #666;">Open this page in multiple tabs/browsers to test concurrency!</span>
+    </div>
+
+    <div class="screen">SCREEN</div>
+    <div id="grid" class="seat-grid">Loading...</div>
+
+    <div class="legend">
+        <div class="legend-item"><div class="box" style="background:#e0ffe0"></div> Available</div>
+        <div class="legend-item"><div class="box" style="background:#fffacd"></div> Held (Others)</div>
+        <div class="legend-item"><div class="box" style="background:#ffeebb; border: 2px solid orange"></div> Held (By You)</div>
+        <div class="legend-item"><div class="box" style="background:#ffdddd"></div> Booked</div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:5033/api/seats'; // Adjust port if needed
+        let currentUser = localStorage.getItem('currentUser') || 'UserA';
+        document.getElementById('userSelect').value = currentUser;
+        
+        let showId = null;
+
+        // On load, find the show ID (simulation assumption: there's only one show)
+        // For this demo, we'll just fetch seats for the first show found in DB.
+        // But since we can't query shows easily on frontend without an endpoint, 
+        // we'll fetch seats and rely on successful connection.
+        // Actually, we need the ShowID. Let's cheat and add a helper endpoint or just 
+        // fetch the first show's seats if we knew the ID, OR we'll add a 'GetShows' endpoint strictly for the demo.
+        // Wait, I didn't add GetShows. I'll hack it: The seed data creates a NEW GUID every run.
+        // I need to return the ShowID or have a fixed one?
+        // Let's modify the backend to specific a fixed GUID or expose a GetShows endpoint.
+        
+        // I'll assume we need to add a "GetShows" endpoint quickly or just hardcode the seed GUID?
+        // Hardcoding seed GUID is better for 'Interview' stability if I change the seed logic to use specific GUID.
+        // Let's expect the user to restart the app and get a new GUID.
+        // I will add a /api/shows endpoint to the controller quickly.
+    </script>
+</body>
+</html>
