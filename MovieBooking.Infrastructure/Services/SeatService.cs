@@ -33,6 +33,13 @@ public class SeatService : ISeatService
 
     public async Task<bool> HoldSeatAsync(Guid seatId, string userId)
     {
+        // ... Single Hold implementation (omitted for brevity if purely adding new methods, but here we replace whole file so keep it included or use multi-replace.
+        // Wait, replace_file_content replaces the WHOLE file. I should use multi_replace if I only want to append. 
+        // But the viewing showed the whole file was small enough. 
+        // Let's Stick to the existing logic and append the new methods.
+        // Actually, re-writing the whole file ensures cleanliness given the previous edits.
+        
+        // Single Hold Logic
         try
         {
             var seat = await _context.Seats.FindAsync(seatId);
@@ -47,11 +54,7 @@ public class SeatService : ISeatService
                 seat.HoldExpiryTime = DateTime.UtcNow.AddMinutes(1);
                 
                 await _context.SaveChangesAsync();
-                
-                // SignalR Broadcast
-                await _hubContext.Clients.All.SendAsync("ReceiveSeatUpdate", seatId, (int)SeatStatus.Held, userId);
-                await BroadcastStats(seat.ShowId);
-                
+                await BroadcastUpdate(seatId, SeatStatus.Held, userId, seat.ShowId);
                 return true;
             }
             return false;
@@ -61,41 +64,33 @@ public class SeatService : ISeatService
 
     public async Task<bool> HoldSeatsAsync(List<Guid> seatIds, string userId)
     {
-        // Atomic Bulk Hold
         if (seatIds == null || !seatIds.Any()) return false;
 
         using var transaction = await _context.Database.BeginTransactionAsync();
         try
         {
-            // Sort to prevent deadlocks
             var sortedIds = seatIds.OrderBy(id => id).ToList();
-            
-            var seats = await _context.Seats
-                .Where(s => sortedIds.Contains(s.Id))
-                .ToListAsync();
+            var seats = await _context.Seats.Where(s => sortedIds.Contains(s.Id)).ToListAsync();
 
-            if (seats.Count != sortedIds.Count) return false; // Some seats not found
+            if (seats.Count != sortedIds.Count) return false;
 
             foreach (var seat in seats)
             {
                 bool isExpired = seat.Status == SeatStatus.Held && seat.HoldExpiryTime < DateTime.UtcNow;
                 bool isMine = seat.Status == SeatStatus.Held && seat.UserId == userId;
 
-                // 1. If it's validly held by someone else, Fail.
                 if (seat.Status != SeatStatus.Available && !isExpired && !isMine)
                 {
                     await transaction.RollbackAsync();
                     return false;
                 }
 
-                // 2. If it's Booked, Fail.
-                if (seat.Status == SeatStatus.Booked) 
+                if (seat.Status == SeatStatus.Booked)
                 {
                     await transaction.RollbackAsync();
                     return false;
                 }
 
-                // 3. Otherwise (Available OR Expired OR Mine), Take it.
                 seat.Status = SeatStatus.Held;
                 seat.UserId = userId;
                 seat.HoldExpiryTime = DateTime.UtcNow.AddMinutes(1);
@@ -103,31 +98,16 @@ public class SeatService : ISeatService
 
             await _context.SaveChangesAsync();
             await transaction.CommitAsync();
-            
-            // Broadcast Updates (Fire and forget safe)
-            // We do this AFTER commit. If this fails, we shouldn't fail the request, 
-            // because the DB operation was successful.
-            _ = Task.Run(async () => 
-            {
-                try 
-                {
-                    foreach (var seat in seats)
-                    {
-                        await _hubContext.Clients.All.SendAsync("ReceiveSeatUpdate", seat.Id, (int)SeatStatus.Held, userId);
-                    }
-                    if(seats.Any()) await _hubContext.Clients.All.SendAsync("RefreshStats", seats.First().ShowId);
-                }
-                catch { /* Log error? SignalR failure shouldn't stop flow */ }
-            });
 
+            _ = Task.Run(async () => {
+                 foreach(var s in seats) await BroadcastUpdate(s.Id, SeatStatus.Held, userId, s.ShowId);
+            });
+            
             return true;
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            // Only rollback if transaction hasn't been committed yet
-            // Checking transaction.TransactionId is tricky, simpler is to rely on flow.
-            // If we are here, Commit didn't finish successfully.
-            try { await transaction.RollbackAsync(); } catch { }
+            try { await transaction.RollbackAsync(); } catch {}
             return false;
         }
     }
@@ -137,7 +117,6 @@ public class SeatService : ISeatService
         var seat = await _context.Seats.FindAsync(seatId);
         if (seat == null) return false;
 
-        // Only allow user who held it to release it
         if (seat.Status == SeatStatus.Held && seat.UserId == userId)
         {
             seat.Status = SeatStatus.Available;
@@ -145,12 +124,42 @@ public class SeatService : ISeatService
             seat.HoldExpiryTime = null;
             
             await _context.SaveChangesAsync();
-            
-            await _hubContext.Clients.All.SendAsync("ReceiveSeatUpdate", seatId, (int)SeatStatus.Available, null);
-            await BroadcastStats(seat.ShowId);
+            await BroadcastUpdate(seatId, SeatStatus.Available, null, seat.ShowId);
             return true;
         }
         return false;
+    }
+
+    public async Task<bool> ReleaseSeatsAsync(List<Guid> seatIds, string userId)
+    {
+         if (seatIds == null || !seatIds.Any()) return false;
+         using var transaction = await _context.Database.BeginTransactionAsync();
+         try
+         {
+             var seats = await _context.Seats.Where(s => seatIds.Contains(s.Id)).ToListAsync();
+             foreach(var seat in seats)
+             {
+                 if(seat.Status == SeatStatus.Held && seat.UserId == userId)
+                 {
+                     seat.Status = SeatStatus.Available;
+                     seat.UserId = null;
+                     seat.HoldExpiryTime = null;
+                 }
+                 // If not held by me, ignore or fail? For release, ignoring is safer/fine, specifically "release mine".
+             }
+             await _context.SaveChangesAsync();
+             await transaction.CommitAsync();
+             
+             _ = Task.Run(async () => {
+                 foreach(var s in seats) await BroadcastUpdate(s.Id, SeatStatus.Available, null, s.ShowId);
+             });
+             return true;
+         }
+         catch
+         {
+             try { await transaction.RollbackAsync(); } catch {}
+             return false;
+         }
     }
 
     public async Task<bool> BookSeatAsync(Guid seatId, string userId)
@@ -159,7 +168,7 @@ public class SeatService : ISeatService
         {
             var seat = await _context.Seats.FindAsync(seatId);
             if (seat == null) return false;
-
+            
             if (seat.Status == SeatStatus.Booked && seat.UserId == userId) return true;
 
             if (seat.Status == SeatStatus.Held && seat.UserId == userId)
@@ -170,9 +179,7 @@ public class SeatService : ISeatService
                 seat.HoldExpiryTime = null;
                 
                 await _context.SaveChangesAsync();
-                
-                await _hubContext.Clients.All.SendAsync("ReceiveSeatUpdate", seatId, (int)SeatStatus.Booked, userId);
-                await BroadcastStats(seat.ShowId);
+                await BroadcastUpdate(seatId, SeatStatus.Booked, userId, seat.ShowId);
                 return true;
             }
             return false;
@@ -180,9 +187,54 @@ public class SeatService : ISeatService
         catch (DbUpdateConcurrencyException) { return false; }
     }
 
-    private async Task BroadcastStats(Guid showId)
+    public async Task<bool> BookSeatsAsync(List<Guid> seatIds, string userId)
+    {
+        if (seatIds == null || !seatIds.Any()) return false;
+
+        using var transaction = await _context.Database.BeginTransactionAsync();
+        try
+        {
+            var seats = await _context.Seats.Where(s => seatIds.Contains(s.Id)).ToListAsync();
+            // Validate ALL are held by user
+            foreach (var seat in seats)
+            {
+                if (seat.Status == SeatStatus.Booked && seat.UserId == userId) continue; // Already booked, fine.
+
+                if (seat.Status != SeatStatus.Held || seat.UserId != userId)
+                {
+                    await transaction.RollbackAsync();
+                    return false; 
+                }
+                if (seat.HoldExpiryTime < DateTime.UtcNow)
+                {
+                     await transaction.RollbackAsync();
+                     return false; // Expired
+                }
+
+                seat.Status = SeatStatus.Booked;
+                seat.HoldExpiryTime = null;
+            }
+
+            await _context.SaveChangesAsync();
+            await transaction.CommitAsync();
+
+            _ = Task.Run(async () => {
+                 foreach(var s in seats) await BroadcastUpdate(s.Id, SeatStatus.Booked, userId, s.ShowId);
+            });
+
+            return true;
+        }
+        catch
+        {
+            try { await transaction.RollbackAsync(); } catch {}
+            return false;
+        }
+    }
+
+    private async Task BroadcastUpdate(Guid seatId, SeatStatus status, string? userId, Guid showId)
     {
         try {
+            await _hubContext.Clients.All.SendAsync("ReceiveSeatUpdate", seatId, (int)status, userId);
             await _hubContext.Clients.All.SendAsync("RefreshStats", showId);
         } catch {}
     }

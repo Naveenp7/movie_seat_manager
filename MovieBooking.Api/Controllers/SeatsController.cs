@@ -94,9 +94,27 @@ public class SeatsController : ControllerBase
         if (!success) return BadRequest("Could not release seat.");
         return Ok("Seat released.");
     }
+
+    [HttpPost("book-bulk")]
+    public async Task<IActionResult> BookSeatsBulk([FromBody] BulkBookRequest request)
+    {
+        var success = await _seatService.BookSeatsAsync(request.SeatIds, request.UserId);
+        if (!success) return BadRequest("Unable to book seats. They may have expired or not be held by you.");
+        return Ok("Seats booked.");
+    }
+
+    [HttpPost("release-bulk")]
+    public async Task<IActionResult> ReleaseSeatsBulk([FromBody] BulkReleaseRequest request)
+    {
+        var success = await _seatService.ReleaseSeatsAsync(request.SeatIds, request.UserId);
+        if (!success) return BadRequest("Unable to release seats.");
+        return Ok("Seats released.");
+    }
 }
 
 public record HoldRequest(Guid SeatId, string UserId);
 public record BulkHoldRequest(List<Guid> SeatIds, string UserId);
 public record BookRequest(Guid SeatId, string UserId);
+public record BulkBookRequest(List<Guid> SeatIds, string UserId);
 public record ReleaseRequest(Guid SeatId, string UserId);
+public record BulkReleaseRequest(List<Guid> SeatIds, string UserId);

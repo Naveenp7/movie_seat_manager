@@ -156,4 +156,5 @@ C:\work\Fantacode\movie_seat_manager\MovieBooking.Api\obj\Debug\net10.0\refint\M
 C:\work\Fantacode\movie_seat_manager\MovieBooking.Api\obj\Debug\net10.0\MovieBooking.Api.pdb
 C:\work\Fantacode\movie_seat_manager\MovieBooking.Api\obj\Debug\net10.0\MovieBooking.Api.genruntimeconfig.cache
 C:\work\Fantacode\movie_seat_manager\MovieBooking.Api\obj\Debug\net10.0\ref\MovieBooking.Api.dll
-C:\work\Fantacode\movie_seat_manager\MovieBooking.Api\obj\Debug\net10.0\compressed\syr1grndkx-{0}-8c7qcp2zjf-8c7qcp2zjf.gz
+C:\work\Fantacode\movie_seat_manager\MovieBooking.Api\obj\Debug\net10.0\compressed\syr1grndkx-{0}-e53tw8o2we-e53tw8o2we.gz
+C:\work\Fantacode\movie_seat_manager\MovieBooking.Api\obj\Debug\net10.0\compressed\werx1itsdc-{0}-a39ckpyprj-a39ckpyprj.gz

@@ -15,13 +15,11 @@
             --primary-color: #4f46e5;
             --text-primary: #1f2937;
             --text-secondary: #6b7280;
-
             --seat-avail: #e2e8f0;
             --seat-selected: #4f46e5;
             --seat-held-other: #f59e0b;
             --seat-held-me: #8b5cf6;
             --seat-booked: #ef4444;
-
             --radius-btn: 10px;
             --radius-card: 12px;
         }
@@ -170,8 +168,6 @@
             transform: translateY(0);
         }
 
-        /* Feedback on click */
-
         .seat.selected {
             background-color: var(--seat-selected);
             color: white;
@@ -204,10 +200,8 @@
             pointer-events: none;
         }
 
-        /* New: Selected for Booking (From My-Hold) */
         .seat.selected-for-booking {
             background-color: #6d28d9;
-            /* Darker Purple */
             border: 2px solid #fff;
         }
 
@@ -340,18 +334,16 @@
                 <div style="width:8px; height:8px; background:#22c55e; border-radius:50%"></div> Realtime
             </div>
         </div>
-
         <div class="theater">
             <div class="screen">SCREEN</div>
             <div id="grid" class="seat-grid"></div>
         </div>
-
         <div class="footer-section">
             <div class="message-area" id="message-area">Tap seats to select</div>
             <div class="actions">
-                <button id="btn-cancel" class="btn-cancel" onclick="doRelease()" disabled>RELEASE</button>
+                <button id="btn-cancel" class="btn-cancel" onclick="doReleaseBulk()" disabled>RELEASE</button>
                 <button id="btn-hold" class="btn-hold" onclick="doHoldBulk()" disabled>HOLD SELECTED</button>
-                <button id="btn-book" class="btn-book" onclick="doBookSingle()" disabled>BOOK ONE</button>
+                <button id="btn-book" class="btn-book" onclick="doBookBulk()" disabled>BOOK SELECTED</button>
             </div>
             <div class="legend">
                 <div class="legend-item">
@@ -372,30 +364,19 @@
             </div>
         </div>
     </div>
-
     <script>
         const API_URL = 'http://localhost:5033/api/seats';
         let currentUser = localStorage.getItem('currentUser') || 'UserA';
         document.getElementById('userSelect').value = currentUser;
 
         let showId = null;
-        // Selection State
-        let selectedToHold = new Set(); // IDs of available seats selected for holding
-        let selectedToBook = null;      // ID of ONE held seat selected for booking (Simplicity: Book 1 by 1 for now, or change to bulk too?)
-        // Requirement said "feature 1: Atomic Bulk Booking". 
-        // SeatService has HoldSeatsAsync (Bulk) but BookSeatAsync (Single). 
-        // Let's implement Bulk Hold first as that's the main contention point. 
-        // Booking is usually 1 transaction per "Order", but we can keep booking single for now or minimal bulk.
-        // Let's stick to Bulk HOLD, Single BOOK (standard flow: user holds 5, pays for all... wait, we need bulk book? 
-        // The user only asked for "implement 1, 2, 3". 1 was "Atomic Bulk Operations".
-        // I implemented HoldSeatsAsync (Bulk). I did NOT implement Bulk BOok. 
-        // Usually once held, they are yours. You can book them one by one or all. 
-        // Let's keep booking single for simpler UI, or allow selecting one "My-Held" seat to book.
+        // Selection States
+        let selectedToHold = new Set(); // IDs of available seats
+        let selectedHeldSeats = new Set(); // IDs of my held seats (for booking/releasing)
 
         let currentSeatsData = [];
         let connection = null;
 
-        // DOM Elements
         const grid = document.getElementById('grid');
         const msgArea = document.getElementById('message-area');
         const btnHold = document.getElementById('btn-hold');
@@ -404,56 +385,40 @@
 
         async function init() {
             try {
-                // 1. Get Show
                 const res = await fetch(API_URL.replace('/seats', '/seats/shows'));
                 if (!res.ok) throw new Error("Fault");
                 const shows = await res.json();
                 if (shows.length === 0) return;
                 showId = shows[0].id;
 
-                // 2. Initial Data Load
                 const seatRes = await fetch(`${API_URL}/${showId}`);
                 currentSeatsData = await seatRes.json();
                 buildGrid(currentSeatsData);
                 refreshStats();
 
-                // 3. Connect SignalR
                 connection = new signalR.HubConnectionBuilder()
                     .withUrl("http://localhost:5033/seatHub")
                     .withAutomaticReconnect()
                     .build();
 
                 connection.on("ReceiveSeatUpdate", (seatId, status, userId) => {
-                    // Update Local Data
                     const seat = currentSeatsData.find(s => s.id === seatId);
                     if (seat) {
                         seat.status = status;
                         seat.userId = userId;
-                        // Update UI
                         updateSeatVisual(seat);
-                        // Update Selection Validation
                         validateSelection(seat);
                         updateButtons();
                     }
                 });
 
-                connection.on("RefreshStats", (sid) => {
-                    if (sid === showId) refreshStats();
-                });
-
+                connection.on("RefreshStats", (sid) => { if (sid === showId) refreshStats(); });
                 await connection.start();
-                console.log("SignalR Connected");
 
-                // BACKUP POLLING: Ensure consistency even if SignalR misses a message
                 setInterval(() => {
-                    // Only poll if we aren't dragging/interacting heavily to avoid jitters, 
-                    // but for this app it's fine.
                     fetch(`${API_URL}/${showId}`)
                         .then(r => r.json())
                         .then(data => {
-                            // Merge data carefully? No, just replace state for consistency.
-                            // Actually, let's only update if changed to avoid UI flickering validation.
-                            // Simpler: Just rely on our updateSeatVisual checking.
                             data.forEach(s => {
                                 const existing = currentSeatsData.find(x => x.id === s.id);
                                 if (existing && (existing.status !== s.status || existing.userId !== s.userId)) {
@@ -467,7 +432,6 @@
                             refreshStats();
                         });
                 }, 2000);
-
             } catch (e) { console.error(e); }
         }
 
@@ -488,10 +452,7 @@
                 el.id = `seat-${seat.id}`;
                 el.innerText = `${seat.row}${seat.number}`;
                 el.onclick = () => onSeatClick(seat.id);
-
-                // Set initial class
                 updateSeatVisual(seat, el);
-
                 grid.appendChild(el);
             });
         }
@@ -499,33 +460,25 @@
         function updateSeatVisual(seat, el = null) {
             if (!el) el = document.getElementById(`seat-${seat.id}`);
             if (!el) return;
-
             let classes = 'seat';
             if (seat.status === 2) classes += ' booked';
             else if (seat.status === 1) {
                 if (seat.userId === currentUser) classes += ' my-hold';
                 else classes += ' held';
             }
-
-            // Apply Selection Styles
             if (selectedToHold.has(seat.id)) classes += ' selected';
-            if (selectedToBook === seat.id) classes += ' selected-for-booking';
-
+            if (selectedHeldSeats.has(seat.id)) classes += ' selected-for-booking';
             el.className = classes;
         }
 
-        function validateSelection(changedSeat) {
-            // If a selected seat becomes unavailable (taken by someone else), remove from selection
-            if (selectedToHold.has(changedSeat.id)) {
-                if (changedSeat.status !== 0) { // Not Available anymore
-                    selectedToHold.delete(changedSeat.id);
-                }
+        function validateSelection(seat) {
+            // If seat becomes unavailable, remove from hold selection
+            if (selectedToHold.has(seat.id)) {
+                if (seat.status !== 0) selectedToHold.delete(seat.id);
             }
-            // If booked seat was selected for booking
-            if (selectedToBook === changedSeat.id) {
-                if (changedSeat.status !== 1 || changedSeat.userId !== currentUser) {
-                    selectedToBook = null;
-                }
+            // If held seat is no longer held by me, remove from book selection
+            if (selectedHeldSeats.has(seat.id)) {
+                if (seat.status !== 1 || seat.userId !== currentUser) selectedHeldSeats.delete(seat.id);
             }
         }
 
@@ -533,27 +486,22 @@
             const seat = currentSeatsData.find(s => s.id === clickedId);
             if (!seat) return;
 
-            // Scenario A: Seat is Available -> Toggle Selection for Hold
+            // Scenario A: Seat is Available -> Toggle 'To Hold'
             if (seat.status === 0) {
                 if (selectedToHold.has(clickedId)) selectedToHold.delete(clickedId);
                 else selectedToHold.add(clickedId);
-
-                // Clear Book selection if any
-                selectedToBook = null;
+                selectedHeldSeats.clear(); // Clear other mode
             }
-            // Scenario B: Seat is My Hold -> Select for Booking or Release
+            // Scenario B: Seat is My Hold -> Toggle 'To Book/Release'
             else if (seat.status === 1 && seat.userId === currentUser) {
-                if (selectedToBook === clickedId) selectedToBook = null; // Toggle off
+                if (selectedHeldSeats.has(clickedId)) selectedHeldSeats.delete(clickedId);
                 else {
-                    selectedToBook = clickedId;
-                    // Clear Hold selections? Maybe allow mixed? No, simpler to be mutually exclusive modes.
-                    selectedToHold.clear();
+                    selectedHeldSeats.add(clickedId);
+                    selectedToHold.clear(); // Clear other mode
                 }
             }
 
-            // Re-render all (inefficient? Only need to render modified ones. Ideally we track old state.)
-            // For now, simpler to just re-scan visuals or just update clicked one + cleared ones.
-            // Let's just update ALL to be safe and simple logic-wise.
+            // Re-render
             currentSeatsData.forEach(s => updateSeatVisual(s));
             updateButtons();
         }
@@ -563,26 +511,32 @@
             if (selectedToHold.size > 0) {
                 btnHold.disabled = false;
                 btnHold.innerText = `HOLD (${selectedToHold.size})`;
-
                 btnBook.disabled = true;
+                btnBook.innerText = "BOOK SELECTED";
                 btnCancel.disabled = true;
+                btnCancel.innerText = "RELEASE";
                 msgArea.innerText = `${selectedToHold.size} seats selected to hold`;
             }
             // Mode 2: Booking/Releasing
-            else if (selectedToBook) {
+            else if (selectedHeldSeats.size > 0) {
                 btnHold.disabled = true;
-                btnHold.innerText = "HOLD";
+                btnHold.innerText = "HOLD"; // Reset text
 
                 btnBook.disabled = false;
+                btnBook.innerText = `BOOK (${selectedHeldSeats.size})`;
+
                 btnCancel.disabled = false;
-                msgArea.innerText = "Ready to Book or Release";
+                btnCancel.innerText = `RELEASE (${selectedHeldSeats.size})`;
+
+                msgArea.innerText = `${selectedHeldSeats.size} held seats selected for booking`;
             }
-            // Mode 3: Idle
             else {
                 btnHold.disabled = true;
                 btnHold.innerText = "HOLD";
                 btnBook.disabled = true;
+                btnBook.innerText = "BOOK SELECTED";
                 btnCancel.disabled = true;
+                btnCancel.innerText = "RELEASE";
                 msgArea.innerText = "Tap available seats to select";
             }
         }
@@ -591,18 +545,13 @@
             if (selectedToHold.size === 0) return;
             const ids = Array.from(selectedToHold);
 
-            // OPTIMISTIC UPDATE: Visually hold them immediately
+            // Optimistic
             ids.forEach(id => {
                 const seat = currentSeatsData.find(s => s.id === id);
-                if (seat) {
-                    seat.status = 1; // Held
-                    seat.userId = currentUser;
-                    updateSeatVisual(seat);
-                }
+                if (seat) { seat.status = 1; seat.userId = currentUser; updateSeatVisual(seat); }
             });
-            selectedToHold.clear(); // Clear selection immediately
+            selectedToHold.clear();
             updateButtons();
-
             msgArea.innerText = "Holding...";
 
             try {
@@ -611,83 +560,76 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ seatIds: ids, userId: currentUser })
                 });
-
-                if (res.ok) {
-                    msgArea.innerText = "Success! Seats Held.";
-                    // SignalR/Poll will confirm state
-                } else {
-                    alert("Some seats were already taken!");
-                    // Revert Optimistic update on failure by forcing validation
-                    const r = await fetch(`${API_URL}/${showId}`);
-                    const freshData = await r.json();
-                    freshData.forEach(s => {
-                        const existing = currentSeatsData.find(x => x.id === s.id);
-                        if (existing) {
-                            existing.status = s.status;
-                            existing.userId = s.userId;
-                            updateSeatVisual(existing);
-                        }
-                    });
+                if (res.ok) { msgArea.innerText = "Seats Held."; }
+                else {
+                    alert("Some seats were taken!");
+                    await forceReload();
                 }
                 updateButtons();
             } catch (e) {
                 console.error(e);
-                alert("Connection failed. Please retry.");
-
-                // CRITICAL: Revert on Network Error
-                const r = await fetch(`${API_URL}/${showId}`);
-                const freshData = await r.json();
-                freshData.forEach(s => {
-                    const existing = currentSeatsData.find(x => x.id === s.id);
-                    if (existing) {
-                        existing.status = s.status;
-                        existing.userId = s.userId;
-                        updateSeatVisual(existing);
-                    }
-                });
+                await forceReload();
             }
         }
 
-        async function doBookSingle() {
-            if (!selectedToBook) return;
+        async function doBookBulk() {
+            if (selectedHeldSeats.size === 0) return;
+            const ids = Array.from(selectedHeldSeats);
+
+            // Optimistic
+            ids.forEach(id => {
+                const seat = currentSeatsData.find(s => s.id === id);
+                if (seat) { seat.status = 2; updateSeatVisual(seat); }
+            });
+            selectedHeldSeats.clear();
+            updateButtons();
 
             try {
-                const res = await fetch(`${API_URL}/book`, {
+                const res = await fetch(`${API_URL}/book-bulk`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ seatId: selectedToBook, userId: currentUser })
+                    body: JSON.stringify({ seatIds: ids, userId: currentUser })
                 });
-                if (res.ok) {
-                    selectedToBook = null;
-                    updateButtons();
-                }
-            } catch (e) { }
+                if (!res.ok) { alert("Booking failed"); await forceReload(); }
+            } catch (e) { await forceReload(); }
         }
 
-        async function doRelease() {
-            if (!selectedToBook) return;
+        async function doReleaseBulk() {
+            if (selectedHeldSeats.size === 0) return;
+            const ids = Array.from(selectedHeldSeats);
+
+            // Optimistic
+            ids.forEach(id => {
+                const seat = currentSeatsData.find(s => s.id === id);
+                if (seat) { seat.status = 0; seat.userId = null; updateSeatVisual(seat); }
+            });
+            selectedHeldSeats.clear();
+            updateButtons();
+
             try {
-                const res = await fetch(`${API_URL}/release`, {
+                const res = await fetch(`${API_URL}/release-bulk`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ seatId: selectedToBook, userId: currentUser })
+                    body: JSON.stringify({ seatIds: ids, userId: currentUser })
                 });
-                if (res.ok) {
-                    selectedToBook = null;
-                    updateButtons();
-                }
-            } catch (e) { }
+                if (!res.ok) { await forceReload(); }
+            } catch (e) { await forceReload(); }
+        }
+
+        async function forceReload() {
+            const r = await fetch(`${API_URL}/${showId}`);
+            const fresh = await r.json();
+            fresh.forEach(s => {
+                const ex = currentSeatsData.find(x => x.id === s.id);
+                if (ex) { ex.status = s.status; ex.userId = s.userId; updateSeatVisual(ex); }
+            });
         }
 
         function changeUser() {
             currentUser = document.getElementById('userSelect').value;
             localStorage.setItem('currentUser', currentUser);
-
-            // Clear selections
             selectedToHold.clear();
-            selectedToBook = null;
-
-            // Re-render (highlights change based on user)
+            selectedHeldSeats.clear();
             currentSeatsData.forEach(s => updateSeatVisual(s));
             updateButtons();
         }
