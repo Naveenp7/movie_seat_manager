@@ -9,3 +9,4 @@ C:\work\Fantacode\movie_seat_manager\MovieBooking.Core\obj\Debug\net10.0\MovieBo
 C:\work\Fantacode\movie_seat_manager\MovieBooking.Core\obj\Debug\net10.0\refint\MovieBooking.Core.dll
 C:\work\Fantacode\movie_seat_manager\MovieBooking.Core\obj\Debug\net10.0\MovieBooking.Core.pdb
 C:\work\Fantacode\movie_seat_manager\MovieBooking.Core\obj\Debug\net10.0\ref\MovieBooking.Core.dll
+C:\work\Fantacode\movie_seat_manager\MovieBooking.Core\obj\Debug\net10.0\MovieBooking.Core.sourcelink.json

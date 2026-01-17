@@ -3,3 +3,14 @@ C:\work\Fantacode\movie_seat_manager\MovieBooking.Infrastructure\obj\Debug\net10
 C:\work\Fantacode\movie_seat_manager\MovieBooking.Infrastructure\obj\Debug\net10.0\MovieBooking.Infrastructure.AssemblyInfoInputs.cache
 C:\work\Fantacode\movie_seat_manager\MovieBooking.Infrastructure\obj\Debug\net10.0\MovieBooking.Infrastructure.AssemblyInfo.cs
 C:\work\Fantacode\movie_seat_manager\MovieBooking.Infrastructure\obj\Debug\net10.0\MovieBooking.Infrastructure.csproj.CoreCompileInputs.cache
+C:\work\Fantacode\movie_seat_manager\MovieBooking.Infrastructure\obj\Debug\net10.0\MovieBooking.Infrastructure.sourcelink.json
+C:\work\Fantacode\movie_seat_manager\MovieBooking.Infrastructure\bin\Debug\net10.0\MovieBooking.Infrastructure.deps.json
+C:\work\Fantacode\movie_seat_manager\MovieBooking.Infrastructure\bin\Debug\net10.0\MovieBooking.Infrastructure.dll
+C:\work\Fantacode\movie_seat_manager\MovieBooking.Infrastructure\bin\Debug\net10.0\MovieBooking.Infrastructure.pdb
+C:\work\Fantacode\movie_seat_manager\MovieBooking.Infrastructure\bin\Debug\net10.0\MovieBooking.Core.dll
+C:\work\Fantacode\movie_seat_manager\MovieBooking.Infrastructure\bin\Debug\net10.0\MovieBooking.Core.pdb
+C:\work\Fantacode\movie_seat_manager\MovieBooking.Infrastructure\obj\Debug\net10.0\MovieBoo.F347BB2B.Up2Date
+C:\work\Fantacode\movie_seat_manager\MovieBooking.Infrastructure\obj\Debug\net10.0\MovieBooking.Infrastructure.dll
+C:\work\Fantacode\movie_seat_manager\MovieBooking.Infrastructure\obj\Debug\net10.0\refint\MovieBooking.Infrastructure.dll
+C:\work\Fantacode\movie_seat_manager\MovieBooking.Infrastructure\obj\Debug\net10.0\MovieBooking.Infrastructure.pdb
+C:\work\Fantacode\movie_seat_manager\MovieBooking.Infrastructure\obj\Debug\net10.0\ref\MovieBooking.Infrastructure.dll
