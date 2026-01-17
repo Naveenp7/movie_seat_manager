@@ -444,6 +444,30 @@
                 await connection.start();
                 console.log("SignalR Connected");
 
+                // BACKUP POLLING: Ensure consistency even if SignalR misses a message
+                setInterval(() => {
+                    // Only poll if we aren't dragging/interacting heavily to avoid jitters, 
+                    // but for this app it's fine.
+                    fetch(`${API_URL}/${showId}`)
+                        .then(r => r.json())
+                        .then(data => {
+                            // Merge data carefully? No, just replace state for consistency.
+                            // Actually, let's only update if changed to avoid UI flickering validation.
+                            // Simpler: Just rely on our updateSeatVisual checking.
+                            data.forEach(s => {
+                                const existing = currentSeatsData.find(x => x.id === s.id);
+                                if (existing && (existing.status !== s.status || existing.userId !== s.userId)) {
+                                    existing.status = s.status;
+                                    existing.userId = s.userId;
+                                    updateSeatVisual(existing);
+                                    validateSelection(existing);
+                                }
+                            });
+                            updateButtons();
+                            refreshStats();
+                        });
+                }, 2000);
+
             } catch (e) { console.error(e); }
         }
 
@@ -567,9 +591,18 @@
             if (selectedToHold.size === 0) return;
             const ids = Array.from(selectedToHold);
 
-            // Optimistic UI? No, wait for SignalR or Response. 
-            // Actually, response is safer for Bulk.
-            btnHold.disabled = true;
+            // OPTIMISTIC UPDATE: Visually hold them immediately
+            ids.forEach(id => {
+                const seat = currentSeatsData.find(s => s.id === id);
+                if (seat) {
+                    seat.status = 1; // Held
+                    seat.userId = currentUser;
+                    updateSeatVisual(seat);
+                }
+            });
+            selectedToHold.clear(); // Clear selection immediately
+            updateButtons();
+
             msgArea.innerText = "Holding...";
 
             try {
@@ -580,16 +613,21 @@
                 });
 
                 if (res.ok) {
-                    selectedToHold.clear();
                     msgArea.innerText = "Success! Seats Held.";
-                    // SignalR will update visual
+                    // SignalR/Poll will confirm state
                 } else {
                     alert("Some seats were already taken!");
-                    selectedToHold.clear();
-                    // Force refresh to be sure
+                    // Revert Optimistic update on failure by forcing validation
                     const r = await fetch(`${API_URL}/${showId}`);
-                    currentSeatsData = await r.json();
-                    currentSeatsData.forEach(s => updateSeatVisual(s));
+                    const freshData = await r.json();
+                    freshData.forEach(s => {
+                        const existing = currentSeatsData.find(x => x.id === s.id);
+                        if (existing) {
+                            existing.status = s.status;
+                            existing.userId = s.userId;
+                            updateSeatVisual(existing);
+                        }
+                    });
                 }
                 updateButtons();
             } catch (e) { console.error(e); }
