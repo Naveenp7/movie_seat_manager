@@ -3,145 +3,302 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Seat Booking Simulation</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Movie Seat Manager</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            padding: 20px;
-            background: #fafafa;
+        :root {
+            --bg-color: #f3f4f6;
+            --surface-color: #ffffff;
+            --primary-color: #4f46e5;
+            --text-primary: #1f2937;
+            --text-secondary: #6b7280;
+
+            --seat-avail: #e2e8f0;
+            --seat-selected: #4f46e5;
+            --seat-held-other: #f59e0b;
+            --seat-held-me: #8b5cf6;
+            --seat-booked: #ef4444;
+
+            --radius-btn: 10px;
+            --radius-card: 12px;
         }
 
-        .controls {
-            margin-bottom: 20px;
-            padding: 15px;
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-            border-left: 5px solid #0078d4;
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            margin: 0;
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+            /* Prevent Scrolling */
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Compact Header */
+        header {
+            background: var(--surface-color);
+            padding: 10px 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            text-align: center;
+            z-index: 50;
+            flex-shrink: 0;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #111;
+        }
+
+        /* Main Container: Flex Column to distribute space */
+        .container {
+            flex: 1;
+            width: 95%;
+            max-width: 1000px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-evenly;
+            /* Distribute vertically */
+            padding: 10px 0;
+        }
+
+        /* Dashboard Strip */
+        .dashboard {
+            background: var(--surface-color);
+            padding: 8px 20px;
+            border-radius: var(--radius-card);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .user-panel {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .user-panel label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+        }
+
+        select {
+            padding: 4px 8px;
+            border-radius: 6px;
+            border: 1px solid #e5e7eb;
+            font-size: 0.85rem;
+        }
+
+        #stats-display {
+            font-size: 0.9rem;
+        }
+
+        /* Theater Area */
+        .theater {
+            perspective: 800px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            flex: 1;
+            /* Take available space */
+            /* Scale down if viewport is too small vertically */
+            /* transform: scale(0.9); */
         }
 
         .screen {
-            width: 80%;
+            background: linear-gradient(180deg, #e2e8f0 0%, #cbd5e1 100%);
             height: 30px;
-            background: #444;
-            margin: 0 auto 30px auto;
-            border-radius: 0 0 50px 50px;
-            color: #aaa;
-            text-align: center;
-            font-size: 12px;
-            line-height: 25px;
-            box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.4);
-            transform: perspective(300px) rotateX(-2deg);
+            /* Thinner screen */
+            width: 60%;
+            margin-bottom: 2rem;
+            transform: rotateX(-10deg);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #94a3b8;
+            font-weight: 700;
+            letter-spacing: 3px;
+            font-size: 0.75rem;
         }
 
         .seat-grid {
             display: grid;
             grid-template-columns: repeat(10, 1fr);
-            gap: 8px;
-            max-width: 500px;
-            margin: 0 auto;
+            gap: 10px;
+            width: 100%;
+            max-width: 550px;
         }
 
         .seat {
-            padding: 10px 0;
-            text-align: center;
-            border-radius: 6px;
+            height: 40px;
+            /* Slightly smaller for compactness */
+            background: var(--seat-avail);
+            border-top-left-radius: 12px;
+            border-top-right-radius: 12px;
+            border-bottom-left-radius: 6px;
+            border-bottom-right-radius: 6px;
             cursor: pointer;
-            font-size: 12px;
-            font-weight: bold;
-            user-select: none;
-            transition: all 0.2s;
-            position: relative;
-        }
-
-        .seat:hover {
-            transform: scale(1.1);
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-        }
-
-        /* Available */
-        .seat.available {
-            background-color: white;
-            border: 2px solid #ddd;
-            color: #555;
-        }
-
-        .seat.available:hover {
-            border-color: #88cc88;
-            background-color: #f0fff0;
-        }
-
-        /* Held by Others */
-        .seat.held {
-            background-color: #fffacd;
-            border: 2px solid #eebb00;
-            color: #aa8800;
-            cursor: default;
-        }
-
-        /* Held by Me */
-        .seat.my-hold {
-            background-color: #ffeebb;
-            border: 2px solid #ffaa00;
-            color: #d35400;
-            box-shadow: 0 0 5px orange;
-            animation: pulse 2s infinite;
-        }
-
-        /* Booked */
-        .seat.booked {
-            background-color: #ddd;
-            border: 2px solid #bbb;
-            color: #999;
-            cursor: not-allowed;
-        }
-
-        .seat.booked::after {
-            content: 'X';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
             display: flex;
             align-items: center;
             justify-content: center;
-            opacity: 0.3;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #64748b;
+            position: relative;
+            box-shadow: 0 2px 0 #cbd5e1;
+            transition: all 0.1s;
+        }
+
+        .seat:hover:not(.booked):not(.held) {
+            transform: translateY(-2px);
+            background: #f1f5f9;
+        }
+
+        .seat.selected {
+            background-color: var(--seat-selected);
+            color: white;
+            transform: translateY(-3px);
+            box-shadow: 0 4px 0 #3730a3;
+            z-index: 10;
+        }
+
+        .seat.held {
+            background-color: var(--seat-held-other);
+            color: #78350f;
+            cursor: default;
+            box-shadow: 0 2px 0 #d97706;
+        }
+
+        .seat.my-hold {
+            background-color: var(--seat-held-me);
+            color: white;
+            box-shadow: 0 2px 0 #7c3aed;
+        }
+
+        .seat.booked {
+            background-color: var(--seat-booked);
+            color: rgba(255, 255, 255, 0.8);
+            opacity: 0.5;
+            cursor: not-allowed;
+            box-shadow: none;
+            transform: scale(0.95);
+        }
+
+        /* Footer Section: Message + Actions + Legend */
+        .footer-section {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            align-items: center;
+            flex-shrink: 0;
+            margin-bottom: 10px;
+        }
+
+        .message-area {
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            min-height: 20px;
+            font-weight: 500;
+        }
+
+        .actions {
+            display: flex;
+            gap: 15px;
+        }
+
+        button {
+            padding: 8px 24px;
+            border-radius: var(--radius-btn);
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        button:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .btn-hold {
+            background: var(--primary-color);
+            color: white;
+            box-shadow: 0 2px 4px rgba(79, 70, 229, 0.3);
+        }
+
+        .btn-hold:hover:not(:disabled) {
+            background: #4338ca;
+        }
+
+        .btn-book {
+            background: var(--seat-held-me);
+            color: white;
+            box-shadow: 0 2px 4px rgba(139, 92, 246, 0.3);
+        }
+
+        .btn-book:hover:not(:disabled) {
+            background: #7c3aed;
         }
 
         .legend {
-            margin-top: 40px;
             display: flex;
-            gap: 20px;
             justify-content: center;
-            font-size: 0.9em;
+            gap: 15px;
+            font-size: 0.75rem;
+            background: white;
+            padding: 8px 20px;
+            border-radius: 20px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
         }
 
         .legend-item {
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 5px;
+            color: var(--text-secondary);
         }
 
         .box {
-            width: 16px;
-            height: 16px;
+            width: 12px;
+            height: 12px;
             border-radius: 3px;
-            border: 1px solid #ccc;
         }
 
-        @keyframes pulse {
-            0% {
-                box-shadow: 0 0 0 0 rgba(255, 165, 0, 0.4);
+        /* Media Query for small height screens */
+        @media (max-height: 700px) {
+            .screen {
+                margin-bottom: 1rem;
             }
 
-            70% {
-                box-shadow: 0 0 0 10px rgba(255, 165, 0, 0);
+            .seat {
+                height: 32px;
+                font-size: 0.7rem;
             }
 
-            100% {
-                box-shadow: 0 0 0 0 rgba(255, 165, 0, 0);
+            .seat-grid {
+                max-width: 450px;
             }
         }
     </style>
@@ -149,104 +306,110 @@
 
 <body>
 
-    <h1 style="text-align:center">🎬 Movie Seat Manager</h1>
+    <header>
+        <h1>🎬 Movie Seat Manager</h1>
+    </header>
 
-    <div class="controls">
-        <div style="display:flex; justify-content:space-between; align-items:center;">
-            <div>
-                <label><strong>Current User:</strong></label>
-                <select id="userSelect" onchange="changeUser()" style="padding: 5px;">
+    <div class="container">
+
+        <div class="dashboard">
+            <div class="user-panel">
+                <label>User:</label>
+                <select id="userSelect" onchange="changeUser()">
                     <option value="UserA">User A</option>
                     <option value="UserB">User B</option>
                     <option value="UserC">User C</option>
                 </select>
             </div>
-            <div style="text-align:right">
-                <div id="status" style="color: #333; font-weight:bold;">Loading...</div>
-                <div id="stats-display" style="font-size:0.85em; color:#666; margin-top:5px;">
-                    Avail: - | Held: - | Booked: -
+            <div id="stats-display">
+                <!-- Stats injected here -->
+            </div>
+        </div>
+
+        <div class="theater">
+            <div class="screen">SCREEN</div>
+            <div id="grid" class="seat-grid"></div>
+        </div>
+
+        <div class="footer-section">
+            <div class="message-area" id="message-area">
+                Tap a seat to select
+            </div>
+
+            <div class="actions">
+                <button id="btn-hold" class="btn-hold" onclick="doHold()" disabled>
+                    HOLD
+                </button>
+                <button id="btn-book" class="btn-book" onclick="doBook()" disabled>
+                    BOOK
+                </button>
+            </div>
+
+            <div class="legend">
+                <div class="legend-item">
+                    <div class="box" style="background:var(--seat-avail)"></div> Avail
+                </div>
+                <div class="legend-item">
+                    <div class="box" style="background:var(--seat-selected)"></div> Sel
+                </div>
+                <div class="legend-item">
+                    <div class="box" style="background:var(--seat-held-me)"></div> Mine
+                </div>
+                <div class="legend-item">
+                    <div class="box" style="background:var(--seat-held-other)"></div> Others
+                </div>
+                <div class="legend-item">
+                    <div class="box" style="background:var(--seat-booked); opacity:0.5"></div> Booked
                 </div>
             </div>
         </div>
-        <p style="margin: 10px 0 0 0; font-size: 0.8em; color: #888;">
-            * Click <strong>Available</strong> to HOLD. Click <strong>My Hold</strong> to BOOK.
-            * Holds expire in 1 minute.
-        </p>
-    </div>
 
-    <div class="screen">SCREEN</div>
-    <div id="grid" class="seat-grid"></div>
-
-    <div class="legend">
-        <div class="legend-item">
-            <div class="box" style="background:white; border:2px solid #ddd"></div> Available
-        </div>
-        <div class="legend-item">
-            <div class="box" style="background:#fffacd; border:2px solid #eebb00"></div> Held (Others)
-        </div>
-        <div class="legend-item">
-            <div class="box" style="background:#ffeebb; border:2px solid #ffaa00"></div> Held (By You)
-        </div>
-        <div class="legend-item">
-            <div class="box" style="background:#ddd; border:2px solid #bbb"></div> Booked
-        </div>
     </div>
 
     <script>
-        const API_URL = 'http://localhost:5033/api/seats'; // Verify Port!
+        const API_URL = 'http://localhost:5033/api/seats';
         let currentUser = localStorage.getItem('currentUser') || 'UserA';
         document.getElementById('userSelect').value = currentUser;
 
         let showId = null;
-        let pollingInterval = null;
+        let selectedSeatId = null;
+        let currentSeatsData = [];
 
         async function init() {
             try {
-                // Get Show
                 const res = await fetch(API_URL.replace('/seats', '/seats/shows'));
-                // We replaced to hit /api/seats/shows which I just added. 
-                // Wait, Controller route is [Route("api/[controller]")], so /api/seats/shows is correct?
-                // Yes: [HttpGet("shows")] inside SeatsController.
-
                 if (!res.ok) throw new Error("Failed to load shows");
                 const shows = await res.json();
-                if (shows.length === 0) {
-                    document.getElementById('status').innerText = "No shows found. seeding...";
-                    return;
-                }
+                if (shows.length === 0) return;
                 showId = shows[0].id;
-                document.getElementById('status').innerText = `Watching Show: ${shows[0].title} (${shows[0].startTime})`;
 
-                loadSeats();
-                pollingInterval = setInterval(loadSeats, 1000); // 1s polling
-            } catch (e) {
-                console.error(e);
-                document.getElementById('status').innerText = "Error connecting to API. Is it running?";
-            }
+                loadData();
+                setInterval(loadData, 1000);
+            } catch (e) { console.error(e); }
         }
 
-        async function loadSeats() {
+        async function loadData() {
             if (!showId) return;
             try {
-                // Parallel fetch for speed
                 const [resSeats, resStats] = await Promise.all([
                     fetch(`${API_URL}/${showId}`),
                     fetch(`${API_URL}/${showId}/stats`)
                 ]);
 
-                const seats = await resSeats.json();
+                currentSeatsData = await resSeats.json();
                 const stats = await resStats.json();
 
-                renderSeats(seats);
+                renderSeats(currentSeatsData);
                 renderStats(stats);
-            } catch (e) {
-                console.error("Polling error", e);
-            }
+                updateButtons();
+            } catch (e) { console.error("Polling error", e); }
         }
 
         function renderStats(stats) {
             document.getElementById('stats-display').innerHTML =
-                `Avail: <strong>${stats.availableSeats}</strong> | Held: <strong>${stats.heldSeats}</strong> | Booked: <strong>${stats.bookedSeats}</strong> (Total: ${stats.totalSeats})`;
+                `<span style="margin-right:10px">Avail: <strong style="color:#10b981">${stats.availableSeats}</strong></span>` +
+                `<span style="margin-right:10px">Held: <strong style="color:#f59e0b">${stats.heldSeats}</strong></span>` +
+                `<span>Booked: <strong style="color:#ef4444">${stats.bookedSeats}</strong></span>`;
         }
 
         function renderSeats(seats) {
@@ -254,63 +417,105 @@
             grid.innerHTML = '';
 
             seats.forEach(seat => {
+                // ... same logic ...
                 const el = document.createElement('div');
                 el.className = 'seat';
                 el.innerText = `${seat.row}${seat.number}`;
 
-                // 0=Available, 1=Held, 2=Booked
                 if (seat.status === 2) {
                     el.classList.add('booked');
-                    el.title = "Booked";
                 } else if (seat.status === 1) {
                     if (seat.userId === currentUser) {
                         el.classList.add('my-hold');
-                        el.title = "Held by YOU (Click to Book)";
-                        el.onclick = () => bookSeat(seat.id);
                     } else {
                         el.classList.add('held');
-                        el.title = "Held by someone else";
                     }
-                } else {
-                    el.classList.add('available');
-                    el.title = "Available (Click to Hold)";
-                    el.onclick = () => holdSeat(seat.id);
                 }
 
+                if (selectedSeatId === seat.id) {
+                    el.classList.add('selected');
+                }
+
+                el.onclick = () => onSeatClick(seat);
                 grid.appendChild(el);
             });
         }
 
-        async function holdSeat(seatId) {
+        function onSeatClick(seat) {
+            if (seat.status === 2) return;
+            if (seat.status === 1 && seat.userId !== currentUser) return;
+
+            const msg = document.getElementById('message-area');
+
+            if (selectedSeatId === seat.id) {
+                selectedSeatId = null;
+                msg.innerText = "Selection cleared";
+            } else {
+                selectedSeatId = seat.id;
+                if (seat.status === 0) msg.innerText = `Selected ${seat.row}${seat.number}`;
+                if (seat.status === 1) msg.innerText = `Selected ${seat.row}${seat.number} (Held)`;
+            }
+
+            renderSeats(currentSeatsData);
+            updateButtons();
+        }
+
+        function updateButtons() {
+            const btnHold = document.getElementById('btn-hold');
+            const btnBook = document.getElementById('btn-book');
+
+            if (!selectedSeatId) {
+                btnHold.disabled = true;
+                btnBook.disabled = true;
+                return;
+            }
+
+            const seat = currentSeatsData.find(s => s.id === selectedSeatId);
+            if (!seat) return;
+
+            if (seat.status === 0) { // Available
+                btnHold.disabled = false;
+                btnBook.disabled = true;
+            } else if (seat.status === 1 && seat.userId === currentUser) { // My Hold
+                btnHold.disabled = true;
+                btnBook.disabled = false;
+            } else {
+                btnHold.disabled = true;
+                btnBook.disabled = true;
+            }
+        }
+
+        async function doHold() {
+            if (!selectedSeatId) return;
             try {
                 const res = await fetch(`${API_URL}/hold`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ seatId, userId: currentUser })
+                    body: JSON.stringify({ seatId: selectedSeatId, userId: currentUser })
                 });
-
                 if (res.ok) {
-                    loadSeats(); // Immediate refresh
-                } else {
-                    alert("Failed to hold! (Already taken?)");
+                    loadData();
+                    document.getElementById('message-area').innerText = "Seat Held!";
                 }
+                else alert("Failed to hold.");
             } catch (e) { console.error(e); }
         }
 
-        async function bookSeat(seatId) {
+        async function doBook() {
+            if (!selectedSeatId) return;
             try {
                 const res = await fetch(`${API_URL}/book`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ seatId, userId: currentUser })
+                    body: JSON.stringify({ seatId: selectedSeatId, userId: currentUser })
                 });
-
                 if (res.ok) {
-                    alert("Booked Successfully!");
-                    loadSeats();
+                    selectedSeatId = null;
+                    loadData();
+                    document.getElementById('message-area').innerText = "Booking Confirmed!";
                 } else {
-                    alert("Failed to book! (Expired?)");
-                    loadSeats();
+                    alert("Booking failed.");
+                    loadData();
                 }
             } catch (e) { console.error(e); }
         }
@@ -318,7 +523,8 @@
         function changeUser() {
             currentUser = document.getElementById('userSelect').value;
             localStorage.setItem('currentUser', currentUser);
-            loadSeats();
+            selectedSeatId = null;
+            loadData();
         }
 
         init();
