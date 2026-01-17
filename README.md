@@ -59,3 +59,16 @@ The system employs a "Defense in Depth" strategy to guarantee data integrity und
 | **Database** | Seat Transactions | Limited by disk I/O (ACID) |
 
 *To scale indefinitely, replace existing `MockRedisLockService` with a real Redis Cluster and SQLite with a sharded SQL database.*
+
+---
+
+## ⚙️ Steps to Setup
+
+1.  **Prerequisites**: Ensure **.NET 8 SDK** is installed.
+2.  **Start the Server**:
+    ```bash
+    dotnet run --project MovieBooking.Api/MovieBooking.Api.csproj --urls "http://localhost:5033"
+    ```
+3.  **Access API**:
+    *   API is live at: `http://localhost:5033`
+    *   Swagger Docs (if enabled): `http://localhost:5033/swagger`
