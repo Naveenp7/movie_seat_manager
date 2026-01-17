@@ -103,19 +103,31 @@ public class SeatService : ISeatService
 
             await _context.SaveChangesAsync();
             await transaction.CommitAsync();
-
-            // Broadcast Updates
-            foreach (var seat in seats)
+            
+            // Broadcast Updates (Fire and forget safe)
+            // We do this AFTER commit. If this fails, we shouldn't fail the request, 
+            // because the DB operation was successful.
+            _ = Task.Run(async () => 
             {
-                await _hubContext.Clients.All.SendAsync("ReceiveSeatUpdate", seat.Id, (int)SeatStatus.Held, userId);
-            }
-            if(seats.Any()) await BroadcastStats(seats.First().ShowId);
+                try 
+                {
+                    foreach (var seat in seats)
+                    {
+                        await _hubContext.Clients.All.SendAsync("ReceiveSeatUpdate", seat.Id, (int)SeatStatus.Held, userId);
+                    }
+                    if(seats.Any()) await _hubContext.Clients.All.SendAsync("RefreshStats", seats.First().ShowId);
+                }
+                catch { /* Log error? SignalR failure shouldn't stop flow */ }
+            });
 
             return true;
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            await transaction.RollbackAsync();
+            // Only rollback if transaction hasn't been committed yet
+            // Checking transaction.TransactionId is tricky, simpler is to rely on flow.
+            // If we are here, Commit didn't finish successfully.
+            try { await transaction.RollbackAsync(); } catch { }
             return false;
         }
     }
@@ -170,8 +182,8 @@ public class SeatService : ISeatService
 
     private async Task BroadcastStats(Guid showId)
     {
-        // Ideally, calculate stats and push. For now, just trigger clients to fetch.
-        // Or we can send the actual numbers. Let's send a trigger signal to keep it simple.
-        await _hubContext.Clients.All.SendAsync("RefreshStats", showId);
+        try {
+            await _hubContext.Clients.All.SendAsync("RefreshStats", showId);
+        } catch {}
     }
 }

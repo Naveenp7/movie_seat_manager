@@ -7,7 +7,7 @@
     <title>Movie Seat Manager</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <!-- SignalR Client Library -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js"></script>
+    <script src="/signalr.min.js"></script>
     <style>
         :root {
             --bg-color: #f3f4f6;
@@ -418,7 +418,7 @@
                 refreshStats();
 
                 // 3. Connect SignalR
-                connection = new signalr.HubConnectionBuilder()
+                connection = new signalR.HubConnectionBuilder()
                     .withUrl("http://localhost:5033/seatHub")
                     .withAutomaticReconnect()
                     .build();
@@ -630,7 +630,22 @@
                     });
                 }
                 updateButtons();
-            } catch (e) { console.error(e); }
+            } catch (e) {
+                console.error(e);
+                alert("Connection failed. Please retry.");
+
+                // CRITICAL: Revert on Network Error
+                const r = await fetch(`${API_URL}/${showId}`);
+                const freshData = await r.json();
+                freshData.forEach(s => {
+                    const existing = currentSeatsData.find(x => x.id === s.id);
+                    if (existing) {
+                        existing.status = s.status;
+                        existing.userId = s.userId;
+                        updateSeatVisual(existing);
+                    }
+                });
+            }
         }
 
         async function doBookSingle() {
