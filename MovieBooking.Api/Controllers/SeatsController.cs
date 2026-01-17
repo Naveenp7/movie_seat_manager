@@ -1,7 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
 using MovieBooking.Core.Interfaces;
 using MovieBooking.Core.Entities;
+using MovieBooking.Core.Entities;
 using Microsoft.EntityFrameworkCore;
+using MovieBooking.Core.DTOs;
 
 namespace MovieBooking.Api.Controllers;
 
@@ -25,6 +27,25 @@ public class SeatsController : ControllerBase
     {
         var shows = await _context.Shows.AsNoTracking().ToListAsync();
         return Ok(shows);
+    }
+
+    [HttpGet("{showId}/stats")]
+    public async Task<IActionResult> GetStats(Guid showId)
+    {
+        var stats = await _context.Seats
+            .Where(s => s.ShowId == showId)
+            .GroupBy(s => 1)
+            .Select(g => new ShowStatsDto
+            {
+                ShowId = showId,
+                TotalSeats = g.Count(),
+                AvailableSeats = g.Count(s => s.Status == SeatStatus.Available),
+                HeldSeats = g.Count(s => s.Status == SeatStatus.Held),
+                BookedSeats = g.Count(s => s.Status == SeatStatus.Booked)
+            })
+            .FirstOrDefaultAsync();
+
+        return Ok(stats ?? new ShowStatsDto { ShowId = showId });
     }
 
     [HttpGet("{showId}")]

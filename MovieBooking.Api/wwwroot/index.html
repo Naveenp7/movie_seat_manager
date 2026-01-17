@@ -161,7 +161,12 @@
                     <option value="UserC">User C</option>
                 </select>
             </div>
-            <div id="status" style="color: #666; font-size: 0.9em;">Loading...</div>
+            <div style="text-align:right">
+                <div id="status" style="color: #333; font-weight:bold;">Loading...</div>
+                <div id="stats-display" style="font-size:0.85em; color:#666; margin-top:5px;">
+                    Avail: - | Held: - | Booked: -
+                </div>
+            </div>
         </div>
         <p style="margin: 10px 0 0 0; font-size: 0.8em; color: #888;">
             * Click <strong>Available</strong> to HOLD. Click <strong>My Hold</strong> to BOOK.
@@ -223,12 +228,25 @@
         async function loadSeats() {
             if (!showId) return;
             try {
-                const res = await fetch(`${API_URL}/${showId}`);
-                const seats = await res.json();
+                // Parallel fetch for speed
+                const [resSeats, resStats] = await Promise.all([
+                    fetch(`${API_URL}/${showId}`),
+                    fetch(`${API_URL}/${showId}/stats`)
+                ]);
+
+                const seats = await resSeats.json();
+                const stats = await resStats.json();
+
                 renderSeats(seats);
+                renderStats(stats);
             } catch (e) {
                 console.error("Polling error", e);
             }
+        }
+
+        function renderStats(stats) {
+            document.getElementById('stats-display').innerHTML =
+                `Avail: <strong>${stats.availableSeats}</strong> | Held: <strong>${stats.heldSeats}</strong> | Booked: <strong>${stats.bookedSeats}</strong> (Total: ${stats.totalSeats})`;
         }
 
         function renderSeats(seats) {

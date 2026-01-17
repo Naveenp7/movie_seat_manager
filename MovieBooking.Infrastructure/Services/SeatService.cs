@@ -71,7 +71,14 @@ public class SeatService : ISeatService
             var seat = await _context.Seats.FindAsync(seatId);
             if (seat == null) return false;
 
-            // 1. Validate Ownership
+            // Idempotency Check: If already booked by THIS user, return success.
+            // This handles "Booking completed but client does not receive a response" scenario.
+            if (seat.Status == SeatStatus.Booked && seat.UserId == userId)
+            {
+                return true; 
+            }
+
+            // 1. Validate Ownership for Hold
             if (seat.Status == SeatStatus.Held && seat.UserId == userId)
             {
                 // Check expiry again just in case
