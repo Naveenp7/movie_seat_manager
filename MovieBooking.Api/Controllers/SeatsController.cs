@@ -76,7 +76,27 @@ public class SeatsController : ControllerBase
         }
         return Ok("Seat booked confirmed.");
     }
+    [HttpPost("hold-bulk")]
+    public async Task<IActionResult> HoldSeatsBulk([FromBody] BulkHoldRequest request)
+    {
+        var success = await _seatService.HoldSeatsAsync(request.SeatIds, request.UserId);
+        if (!success)
+        {
+            return Conflict("One or more seats are not available.");
+        }
+        return Ok("Seats held.");
+    }
+
+    [HttpPost("release")]
+    public async Task<IActionResult> ReleaseHold([FromBody] ReleaseRequest request)
+    {
+        var success = await _seatService.ReleaseHoldAsync(request.SeatId, request.UserId);
+        if (!success) return BadRequest("Could not release seat.");
+        return Ok("Seat released.");
+    }
 }
 
 public record HoldRequest(Guid SeatId, string UserId);
+public record BulkHoldRequest(List<Guid> SeatIds, string UserId);
 public record BookRequest(Guid SeatId, string UserId);
+public record ReleaseRequest(Guid SeatId, string UserId);

@@ -8,6 +8,8 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using MovieBooking.Core.Entities;
 using MovieBooking.Infrastructure.Data;
+using Microsoft.AspNetCore.SignalR;
+using MovieBooking.Api.Hubs;
 
 namespace MovieBooking.Infrastructure.BackgroundJobs;
 
@@ -15,11 +17,13 @@ public class SeatCleanupHelper : BackgroundService
 {
     private readonly IServiceProvider _serviceProvider;
     private readonly ILogger<SeatCleanupHelper> _logger;
+    private readonly IHubContext<SeatHub> _hubContext;
 
-    public SeatCleanupHelper(IServiceProvider serviceProvider, ILogger<SeatCleanupHelper> logger)
+    public SeatCleanupHelper(IServiceProvider serviceProvider, ILogger<SeatCleanupHelper> logger, IHubContext<SeatHub> hubContext)
     {
         _serviceProvider = serviceProvider;
         _logger = logger;
+        _hubContext = hubContext;
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -37,21 +41,30 @@ public class SeatCleanupHelper : BackgroundService
                     
                     var now = DateTime.UtcNow;
                     
-                    // We can do this with a batch update if using EF Core 7+ ExecuteUpdateAsync, 
-                    // which is much more efficient than fetching all entities. 
-                    // Since the user asked for .NET latest (8), we use ExecuteUpdateAsync.
-                    
-                    var expiredCount = await context.Seats
-                        .Where(s => s.Status == SeatStatus.Held && s.HoldExpiryTime < now)
-                        .ExecuteUpdateAsync(s => s
-                            .SetProperty(x => x.Status, SeatStatus.Available)
-                            .SetProperty(x => x.UserId, (string?)null)
-                            .SetProperty(x => x.HoldExpiryTime, (DateTime?)null),
-                            stoppingToken);
+                    // Efficient Bulk Update is great for DB, but we need to notify clients.
+                    // ExecuteUpdateAsync doesn't return the IDs modified easily in one go combined with the update logic unless we fetch first.
+                    // For SignalR, we unfortunately need to know WHICH seats expired.
+                    // Performance Trade-off: Fetch expired seats, then update them.
 
-                    if (expiredCount > 0)
+                    var expiredSeats = await context.Seats
+                        .Where(s => s.Status == SeatStatus.Held && s.HoldExpiryTime < DateTime.UtcNow)
+                        .ToListAsync(stoppingToken);
+
+                    if (expiredSeats.Any())
                     {
-                        _logger.LogInformation($"Released {expiredCount} expired seat holds.");
+                        foreach (var seat in expiredSeats)
+                        {
+                            seat.Status = SeatStatus.Available;
+                            seat.UserId = null;
+                            seat.HoldExpiryTime = null;
+                            // SignalR Broadcast
+                            await _hubContext.Clients.All.SendAsync("ReceiveSeatUpdate", seat.Id, (int)SeatStatus.Available, null);
+                        }
+                        
+                        await context.SaveChangesAsync(stoppingToken);
+                        await _hubContext.Clients.All.SendAsync("RefreshStats", expiredSeats.First().ShowId);
+                        
+                        _logger.LogInformation($"Released {expiredSeats.Count} expired seats.");
                     }
                 }
             }

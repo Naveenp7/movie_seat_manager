@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using MovieBooking.Core.Interfaces;
 using MovieBooking.Infrastructure.BackgroundJobs;
+using MovieBooking.Api.Hubs;
 using MovieBooking.Infrastructure.Data;
 using MovieBooking.Infrastructure.Services;
 using MovieBooking.Core.Entities;
@@ -9,6 +10,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllers();
+builder.Services.AddSignalR();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
@@ -40,6 +42,7 @@ app.UseCors("AllowAll");
 app.UseStaticFiles(); // Serve index.html
 app.UseAuthorization();
 app.MapControllers();
+app.MapHub<SeatHub>("/seatHub");
 
 
 // Auto-migrate and Seed Data on Startup (for demo purposes)
