@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using MovieBooking.Core.Interfaces;
 using MovieBooking.Core.Entities;
+using Microsoft.EntityFrameworkCore;
 
 namespace MovieBooking.Api.Controllers;
 

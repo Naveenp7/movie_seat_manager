@@ -31,7 +31,7 @@ public class AppDbContext : DbContext
             
             // Configure Optimistic Concurrency
             entity.Property(e => e.RowVersion)
-                .IsRowVersion();
+                .IsConcurrencyToken(); // Use ConcurrencyToken for SQLite manual handling
         });
     }
 
@@ -51,12 +51,9 @@ public class AppDbContext : DbContext
     {
         foreach (var entry in ChangeTracker.Entries<Seat>())
         {
-            if (entry.State == EntityState.Modified)
+            if (entry.State == EntityState.Modified || entry.State == EntityState.Added)
             {
-                // Manually increment/change RowVersion for SQLite simulation
-                // In SQL Server, this is ignored as the DB handles it.
-                // But EF Core might expect us to provide a value if we map it? 
-                // Actually, for SQLite, we just need the value to change.
+                // Manually set RowVersion for SQLite
                 entry.Entity.RowVersion = Guid.NewGuid().ToByteArray();
             }
         }
