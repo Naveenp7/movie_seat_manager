@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using MovieBooking.Core.Interfaces;
 using MovieBooking.Infrastructure.BackgroundJobs;
-using MovieBooking.Api.Hubs;
+using MovieBooking.Infrastructure.Hubs;
 using MovieBooking.Infrastructure.Data;
 using MovieBooking.Infrastructure.Services;
 using MovieBooking.Core.Entities;

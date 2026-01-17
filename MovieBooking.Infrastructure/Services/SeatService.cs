@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.SignalR;
 using MovieBooking.Core.Entities;
 using MovieBooking.Core.Interfaces;
 using MovieBooking.Infrastructure.Data;
-using MovieBooking.Api.Hubs;
+using MovieBooking.Infrastructure.Hubs;
 
 namespace MovieBooking.Infrastructure.Services;
 

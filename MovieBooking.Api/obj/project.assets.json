@@ -927,7 +927,10 @@
         },
         "runtime": {
           "bin/placeholder/MovieBooking.Infrastructure.dll": {}
-        }
+        },
+        "frameworkReferences": [
+          "Microsoft.AspNetCore.App"
+        ]
       }
     }
   },

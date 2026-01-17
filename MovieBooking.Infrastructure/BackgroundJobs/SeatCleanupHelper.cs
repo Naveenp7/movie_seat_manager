@@ -9,7 +9,7 @@ using Microsoft.Extensions.Logging;
 using MovieBooking.Core.Entities;
 using MovieBooking.Infrastructure.Data;
 using Microsoft.AspNetCore.SignalR;
-using MovieBooking.Api.Hubs;
+using MovieBooking.Infrastructure.Hubs;
 
 namespace MovieBooking.Infrastructure.BackgroundJobs;
 

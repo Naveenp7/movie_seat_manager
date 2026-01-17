@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "aWN1Rlv6zr8=",
+  "dgSpecHash": "gUvZd6C0e5s=",
   "success": true,
   "projectFilePath": "C:\\work\\Fantacode\\movie_seat_manager\\MovieBooking.Infrastructure\\MovieBooking.Infrastructure.csproj",
   "expectedPackageFiles": [
@@ -11,41 +11,51 @@
     "C:\\Users\\navee\\.nuget\\packages\\microsoft.entityframeworkcore.relational\\10.0.2\\microsoft.entityframeworkcore.relational.10.0.2.nupkg.sha512",
     "C:\\Users\\navee\\.nuget\\packages\\microsoft.entityframeworkcore.sqlite\\10.0.2\\microsoft.entityframeworkcore.sqlite.10.0.2.nupkg.sha512",
     "C:\\Users\\navee\\.nuget\\packages\\microsoft.entityframeworkcore.sqlite.core\\10.0.2\\microsoft.entityframeworkcore.sqlite.core.10.0.2.nupkg.sha512",
-    "C:\\Users\\navee\\.nuget\\packages\\microsoft.extensions.caching.abstractions\\10.0.2\\microsoft.extensions.caching.abstractions.10.0.2.nupkg.sha512",
-    "C:\\Users\\navee\\.nuget\\packages\\microsoft.extensions.caching.memory\\10.0.2\\microsoft.extensions.caching.memory.10.0.2.nupkg.sha512",
-    "C:\\Users\\navee\\.nuget\\packages\\microsoft.extensions.configuration\\10.0.2\\microsoft.extensions.configuration.10.0.2.nupkg.sha512",
-    "C:\\Users\\navee\\.nuget\\packages\\microsoft.extensions.configuration.abstractions\\10.0.2\\microsoft.extensions.configuration.abstractions.10.0.2.nupkg.sha512",
-    "C:\\Users\\navee\\.nuget\\packages\\microsoft.extensions.configuration.binder\\10.0.2\\microsoft.extensions.configuration.binder.10.0.2.nupkg.sha512",
-    "C:\\Users\\navee\\.nuget\\packages\\microsoft.extensions.configuration.commandline\\10.0.2\\microsoft.extensions.configuration.commandline.10.0.2.nupkg.sha512",
-    "C:\\Users\\navee\\.nuget\\packages\\microsoft.extensions.configuration.environmentvariables\\10.0.2\\microsoft.extensions.configuration.environmentvariables.10.0.2.nupkg.sha512",
-    "C:\\Users\\navee\\.nuget\\packages\\microsoft.extensions.configuration.fileextensions\\10.0.2\\microsoft.extensions.configuration.fileextensions.10.0.2.nupkg.sha512",
-    "C:\\Users\\navee\\.nuget\\packages\\microsoft.extensions.configuration.json\\10.0.2\\microsoft.extensions.configuration.json.10.0.2.nupkg.sha512",
-    "C:\\Users\\navee\\.nuget\\packages\\microsoft.extensions.configuration.usersecrets\\10.0.2\\microsoft.extensions.configuration.usersecrets.10.0.2.nupkg.sha512",
-    "C:\\Users\\navee\\.nuget\\packages\\microsoft.extensions.dependencyinjection\\10.0.2\\microsoft.extensions.dependencyinjection.10.0.2.nupkg.sha512",
-    "C:\\Users\\navee\\.nuget\\packages\\microsoft.extensions.dependencyinjection.abstractions\\10.0.2\\microsoft.extensions.dependencyinjection.abstractions.10.0.2.nupkg.sha512",
     "C:\\Users\\navee\\.nuget\\packages\\microsoft.extensions.dependencymodel\\10.0.2\\microsoft.extensions.dependencymodel.10.0.2.nupkg.sha512",
-    "C:\\Users\\navee\\.nuget\\packages\\microsoft.extensions.diagnostics\\10.0.2\\microsoft.extensions.diagnostics.10.0.2.nupkg.sha512",
-    "C:\\Users\\navee\\.nuget\\packages\\microsoft.extensions.diagnostics.abstractions\\10.0.2\\microsoft.extensions.diagnostics.abstractions.10.0.2.nupkg.sha512",
-    "C:\\Users\\navee\\.nuget\\packages\\microsoft.extensions.fileproviders.abstractions\\10.0.2\\microsoft.extensions.fileproviders.abstractions.10.0.2.nupkg.sha512",
-    "C:\\Users\\navee\\.nuget\\packages\\microsoft.extensions.fileproviders.physical\\10.0.2\\microsoft.extensions.fileproviders.physical.10.0.2.nupkg.sha512",
-    "C:\\Users\\navee\\.nuget\\packages\\microsoft.extensions.filesystemglobbing\\10.0.2\\microsoft.extensions.filesystemglobbing.10.0.2.nupkg.sha512",
     "C:\\Users\\navee\\.nuget\\packages\\microsoft.extensions.hosting\\10.0.2\\microsoft.extensions.hosting.10.0.2.nupkg.sha512",
     "C:\\Users\\navee\\.nuget\\packages\\microsoft.extensions.hosting.abstractions\\10.0.2\\microsoft.extensions.hosting.abstractions.10.0.2.nupkg.sha512",
-    "C:\\Users\\navee\\.nuget\\packages\\microsoft.extensions.logging\\10.0.2\\microsoft.extensions.logging.10.0.2.nupkg.sha512",
     "C:\\Users\\navee\\.nuget\\packages\\microsoft.extensions.logging.abstractions\\10.0.2\\microsoft.extensions.logging.abstractions.10.0.2.nupkg.sha512",
-    "C:\\Users\\navee\\.nuget\\packages\\microsoft.extensions.logging.configuration\\10.0.2\\microsoft.extensions.logging.configuration.10.0.2.nupkg.sha512",
-    "C:\\Users\\navee\\.nuget\\packages\\microsoft.extensions.logging.console\\10.0.2\\microsoft.extensions.logging.console.10.0.2.nupkg.sha512",
-    "C:\\Users\\navee\\.nuget\\packages\\microsoft.extensions.logging.debug\\10.0.2\\microsoft.extensions.logging.debug.10.0.2.nupkg.sha512",
-    "C:\\Users\\navee\\.nuget\\packages\\microsoft.extensions.logging.eventlog\\10.0.2\\microsoft.extensions.logging.eventlog.10.0.2.nupkg.sha512",
-    "C:\\Users\\navee\\.nuget\\packages\\microsoft.extensions.logging.eventsource\\10.0.2\\microsoft.extensions.logging.eventsource.10.0.2.nupkg.sha512",
-    "C:\\Users\\navee\\.nuget\\packages\\microsoft.extensions.options\\10.0.2\\microsoft.extensions.options.10.0.2.nupkg.sha512",
-    "C:\\Users\\navee\\.nuget\\packages\\microsoft.extensions.options.configurationextensions\\10.0.2\\microsoft.extensions.options.configurationextensions.10.0.2.nupkg.sha512",
-    "C:\\Users\\navee\\.nuget\\packages\\microsoft.extensions.primitives\\10.0.2\\microsoft.extensions.primitives.10.0.2.nupkg.sha512",
     "C:\\Users\\navee\\.nuget\\packages\\sqlitepclraw.bundle_e_sqlite3\\2.1.11\\sqlitepclraw.bundle_e_sqlite3.2.1.11.nupkg.sha512",
     "C:\\Users\\navee\\.nuget\\packages\\sqlitepclraw.core\\2.1.11\\sqlitepclraw.core.2.1.11.nupkg.sha512",
     "C:\\Users\\navee\\.nuget\\packages\\sqlitepclraw.lib.e_sqlite3\\2.1.11\\sqlitepclraw.lib.e_sqlite3.2.1.11.nupkg.sha512",
-    "C:\\Users\\navee\\.nuget\\packages\\sqlitepclraw.provider.e_sqlite3\\2.1.11\\sqlitepclraw.provider.e_sqlite3.2.1.11.nupkg.sha512",
-    "C:\\Users\\navee\\.nuget\\packages\\system.diagnostics.eventlog\\10.0.2\\system.diagnostics.eventlog.10.0.2.nupkg.sha512"
+    "C:\\Users\\navee\\.nuget\\packages\\sqlitepclraw.provider.e_sqlite3\\2.1.11\\sqlitepclraw.provider.e_sqlite3.2.1.11.nupkg.sha512"
   ],
-  "logs": []
+  "logs": [
+    {
+      "code": "NU1510",
+      "level": "Warning",
+      "message": "PackageReference Microsoft.Extensions.Hosting will not be pruned. Consider removing this package from your dependencies, as it is likely unnecessary.",
+      "projectPath": "C:\\work\\Fantacode\\movie_seat_manager\\MovieBooking.Infrastructure\\MovieBooking.Infrastructure.csproj",
+      "warningLevel": 1,
+      "filePath": "C:\\work\\Fantacode\\movie_seat_manager\\MovieBooking.Infrastructure\\MovieBooking.Infrastructure.csproj",
+      "libraryId": "Microsoft.Extensions.Hosting",
+      "targetGraphs": [
+        "net10.0"
+      ]
+    },
+    {
+      "code": "NU1510",
+      "level": "Warning",
+      "message": "PackageReference Microsoft.Extensions.Hosting.Abstractions will not be pruned. Consider removing this package from your dependencies, as it is likely unnecessary.",
+      "projectPath": "C:\\work\\Fantacode\\movie_seat_manager\\MovieBooking.Infrastructure\\MovieBooking.Infrastructure.csproj",
+      "warningLevel": 1,
+      "filePath": "C:\\work\\Fantacode\\movie_seat_manager\\MovieBooking.Infrastructure\\MovieBooking.Infrastructure.csproj",
+      "libraryId": "Microsoft.Extensions.Hosting.Abstractions",
+      "targetGraphs": [
+        "net10.0"
+      ]
+    },
+    {
+      "code": "NU1510",
+      "level": "Warning",
+      "message": "PackageReference Microsoft.Extensions.Logging.Abstractions will not be pruned. Consider removing this package from your dependencies, as it is likely unnecessary.",
+      "projectPath": "C:\\work\\Fantacode\\movie_seat_manager\\MovieBooking.Infrastructure\\MovieBooking.Infrastructure.csproj",
+      "warningLevel": 1,
+      "filePath": "C:\\work\\Fantacode\\movie_seat_manager\\MovieBooking.Infrastructure\\MovieBooking.Infrastructure.csproj",
+      "libraryId": "Microsoft.Extensions.Logging.Abstractions",
+      "targetGraphs": [
+        "net10.0"
+      ]
+    }
+  ]
 }
