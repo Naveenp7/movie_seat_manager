@@ -2,6 +2,7 @@
 
 A production-grade backend system designed to handle high-concurrency movie ticket bookings. This solution addresses race conditions, system failures, and network inconsistencies using a **Distributed Locking mechanism**, **Idempotency**, and **ACID-compliant transactions**.
 
+![demo](seat_man.gif)
 ---
 
 ## 📋 Problem Statement & Solution Matrix
@@ -169,9 +170,9 @@ A **k6** load testing script is included to simulate high concurrency.
 ## 🧠 Design Decisions
 
 ### Why Redis Locks?
-*   **Decision**: We use Redis as a first line of defense.
-*   **Benefit**: Prevents database "Hot Row" contention. If 5,000 users click the same seat, Redis rejects 4,999 of them in memory before they even hit the Postgres transaction log.
+*   **Decision**: I use Redis as a first line of defense.
+*   **Benefit**: Prevents database "Hot Row" contention. If 5,000 users click the same seat, Redis rejects 4,999 of them in memory before they even hit the Postgres transaction log. 
 
 ### Why SignalR?
-*   **Decision**: Instead of clients polling for seat status, we push updates.
-*   **Benefit**: Reduces server load and provides a smoother user experience where seats turn "Red" (booked) instantly for everyone.
+*   **Decision**: Instead of clients polling for seat status, I push updates.
+*   **Benefit**: Reduces server load and provides a smoother user experience where seats turn "Red" (booked) instantly for everyone. 
