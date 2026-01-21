@@ -2,6 +2,7 @@
 
 A production-grade backend system designed to handle high-concurrency movie ticket bookings. This solution addresses race conditions, system failures, and network inconsistencies using a **Distributed Locking mechanism**, **Idempotency**, and **ACID-compliant transactions**.
 
+![demo](seat_man.gif)
 ---
 
 ## 📋 Problem Statement & Solution Matrix
